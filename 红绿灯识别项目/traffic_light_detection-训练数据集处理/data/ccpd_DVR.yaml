@@ -1,0 +1,7 @@
+path: D:\迅雷下载\AI数据集汇总\Vimicro_DVR_Dataset\extract_detect_traffic_light\Real_DVR_train_detect_traffic_light\
+train: D:\迅雷下载\AI数据集汇总\Vimicro_DVR_Dataset\extract_detect_traffic_light\Real_DVR_train_detect_traffic_light\train\images
+val: D:\迅雷下载\AI数据集汇总\Vimicro_DVR_Dataset\extract_detect_traffic_light\Real_DVR_train_detect_traffic_light\val\images
+test: D:\迅雷下载\AI数据集汇总\Vimicro_DVR_Dataset\extract_detect_traffic_light\Real_DVR_train_detect_traffic_light\val\images
+
+nc: 12
+names: ['GAF_1','GAL_1','GAR_1','GC_1','RAF_1','RAL_1','RAR_1','RC_1','YC_1','YAR_1','YAF_1','YAL_1']

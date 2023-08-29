@@ -1,0 +1,19 @@
+1.检测、获取车牌样本：
+
+    使用213服务器上训练好的车牌检测模型：/home/zhangzhuo/git_workspace/yolov5/runs/car_brand_model/weights/best.pt
+    检测命令：
+    python ./detect.py \
+    --weights ./runs/car_brand_model/weights/best.pt  \
+    --source  /home/zhangzhuo/total_dataset/Vimicro_Image_dataset \
+    --img-size 576 1024 \
+    --nosave --save-txt \
+    --project detect_DVR_car_brand --name shenzhen_car_brand
+
+
+
+2.提取有效的目标样本图片、标注信息。程序脚本：extract_car_brand_image_detect.py
+
+
+
+
+

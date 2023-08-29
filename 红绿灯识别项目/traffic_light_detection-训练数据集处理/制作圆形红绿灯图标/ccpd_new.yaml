@@ -1,0 +1,9 @@
+# Train/val/test sets as 1) dir: path/to/imgs, 2) file: path/to/imgs.txt, or 3) list: [path/to/imgs1, path/to/imgs2, ..]
+path: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection/traffic_light_detection_coco_buff  # dataset root dir
+train: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection/train/images  # train images (relative to 'path') 128 images
+val: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection/val/images  # val images (relative to 'path') 128 images
+test:  # test images (optional)
+
+# Classes
+nc: 9  # number of classes
+names: ['GC_1','RC_1','YC_1','GAF_1','GAL_1','GAR_1','RAF_1','RAL_1','RAR_1']  # class names

@@ -1,0 +1,97 @@
+1.汇总项目使用的样本图片
+
+    样本图片来源：
+    1.上海车载监控样本图：/home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai/SH_1080p_jpg                          28933
+    2.深圳车载监控样本图：/home/database/IntelligentTransportation/Vimicro_Image_dataset                          128242
+    3.人车非监控样本图：/home/zhangzhuo/git_workspace/yolov5/datasets/PersonCarAndOthers                           48997
+
+    汇总上海样本：/home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai
+        copy_image_to_dest_folder.py
+        或者：cp -r  /home/database/IntelligentTransportation/SH_1080p_jpg/ /home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai
+        样本量：28933  （查询当前目录样本个数：ls -l | grep "^-" | wc -l）
+
+    验证预训练模型效果：在本地主机验证（效果满足要求）
+        D:\Git_WareHouse\yolov5-master\我的测试脚本：
+            python ./detect_origin.py --weights ./runs/train/traffic_light_model/weights/best_bdd.pt   --source  ./test_DVR_all_classify --img-size 576 1024 --name test_DVR_all_classify --save-txt
+
+
+2.使用训练好的bdd100k模型，对以上严格本进行检测标注，生成标注文件
+  预训练模型：best_bdd.pt
+  检测命令： 上海样本
+    python3 ./detect.py \
+      --weights ./pretrain_model/best_bdd.pt  \
+      --source  /home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai/SH_1080p_jpg/ \
+      --img-size 576 1024 \
+      --nosave   --exist-ok --save-txt \
+      --project detect_DVR_Vimicro_Image --name shanghai_select
+  检测命令：深圳样本
+    python3 ./detect.py \
+      --weights ./pretrain_model/best_bdd.pt  \
+      --source  /home/zhangzhuo/total_dataset/Vimicro_Image_dataset/ \
+      --img-size 576 1024 \
+      --nosave   --exist-ok --save-txt \
+      --project detect_DVR_Vimicro_Image --name shenzhen_select
+  检测命令：人车非检测
+    python3 ./detect.py \
+      --weights ./pretrain_model/best_bdd.pt  \
+      --source  /home/zhangzhuo/git_workspace/yolov5/datasets/PersonCarAndOthers/train/images/ \
+      --img-size 576 1024 \
+      --device 3 \
+      --nosave   --exist-ok --save-txt \
+      --project detect_DVR_Vimicro_Image --name personcarother_select
+  ``````````````````````````````````````````````````````````````````````````````````````````````````````
+  # 车牌样本标注
+  预训练模型：best_1024.pt (车牌检测模型)
+    python ./detect.py \
+       --weights ./pretrain_model/best_1024.pt   \
+       --source  /home/zhangzhuo/total_dataset/Vimicro_Image_dataset/ \
+       --img-size 576 1024 \
+       --exist-ok \
+       --nosave   --exist-ok --save-txt \
+       --project detect_DVR_Vimicro_Image --name shenzhen_car_brand
+
+    python ./detect.py \
+       --weights ./pretrain_model/best_1024.pt   \
+       --source  /home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai/SH_1080p_jpg/ \
+       --img-size 576 1024 \
+       --exist-ok \
+       --nosave   --exist-ok --save-txt \
+       --project detect_DVR_Vimicro_Image --name shanghai_car_brand
+
+    python ./detect.py \
+       --weights ./pretrain_model/best_1024.pt   \
+       --source  /home/zhangzhuo/git_workspace/yolov5/detect_person_car_other_Vimicro_Image/car_brand/images/ \
+       --img-size 576 1024 \
+       --exist-ok \
+       --nosave   --exist-ok --save-txt \
+       --project detect_DVR_Vimicro_Image --name person_car_other_car_brand
+
+# 检测类别为：13种
+    names:{
+            'person':0,'rider':1,'car':2,'bus':3,
+            'truck':4,'bike':5,'motor':6,'tl_green':7,
+            'tl_red':8,'tl_yellow':9,'tl_none':10,
+            't_sign':11,'train':12
+          }
+
+注：由于以上使用同一个模型，制作的检测框。因此同一张图像对应的标签信息没有交叉项,因此可以直接将图片和标签文件存储到同一数据集的images、labels下。
+使用以下程序完成操作动作：
+    D:\中星微人工智能工作\Vimicro-Project\人车非检测识别项目\汽车、行人、机动车检测项目\2.筛选目标图片及其标注文件—构造训练样本.py
+
+# 得到person、car 训练数据集：
+    /home/zhangzhuo/git_workspace/yolov5/datasets/person_car_dataset
+--------------------------------------------------------------------------------------------------------
+# 将person、car 训练数据集和车牌数据集汇总为：person、car、car_plate训练数据集：
+    1：/home/zhangzhuo/git_workspace/yolov5/datasets/person_car_dataset/
+    2：/home/database/IntelligentTransportation/CarPlateTotalDatasets/
+
+    汇总：/home/zhangzhuo/git_workspace/yolov5/datasets/person_car_carplate_dataset
+---------------------------------------------------------------------------------------------------------
+
+3.筛选标注文件，合并图片、标注构成训练样本
+    注：可以先只做标注文件的合并换换存储。样本图片的话，可能等到最终的多目标合并标签存储，并整合后，再统一拷贝复制图片到同一个项目中。
+    使用如下程序：
+        D:\中星微人工智能工作\Vimicro-Project\NPU部署相关程序\整合多标签训练集—合并统一样本集\1.整合多个标签样本集—合并样本.py
+
+4.训练模型
+python -m torch.distributed.launch --nproc_per_node 3 train.py --data ./data/PrivacyMaskingCarPlateFace.yaml --cfg ./models/yolov5s_focus_p3_PrivacyMaskingCarPlateFace.yaml --weights ./pretrain_model/yolov5s.pt --batch-size 80 --img-size 1024 --epochs 150 --noval --device 0,1,2

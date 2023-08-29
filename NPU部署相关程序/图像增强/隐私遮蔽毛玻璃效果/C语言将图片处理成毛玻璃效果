@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <opencv2/opencv.hpp>
+#include <random>
+#include <string>
+#include <chrono>
+
+using namespace cv;
+
+int main() {
+	// 读取图片
+	Mat image = imread("C:/Users/34426/Pictures/20230518110405.png");
+
+	if (image.empty()) {
+		printf("无法读取图片文件\n");
+		return -1;
+	}
+
+	// 创建输出图片
+	Mat output;
+
+	//图像的高：
+	double height = image.rows;
+	double gaosi_kernal = std::ceil(height / 8);
+	int convertedNum = static_cast<int>(gaosi_kernal);
+	std::cout << "gaosi_kernal: " << convertedNum << std::endl;
+
+	//创建随机数
+
+	std::random_device rd;  // 随机数设备
+	std::mt19937 gen(rd()); // 随机数生成器
+	std::uniform_int_distribution<int> dist(1, 10); // 生成10到100之间的均匀分布整数
+
+
+	for (int i = 0; i < 100; ++i)
+		{
+			int randomNum = dist(gen);
+			std::cout << randomNum << std::endl;
+			// 开始计时
+			auto start = std::chrono::high_resolution_clock::now();
+
+			// 应用毛玻璃效果
+			blur(image, output, Size(convertedNum, convertedNum));
+			// 结束计时
+			auto end = std::chrono::high_resolution_clock::now();
+
+			// 计算运行时长
+			std::chrono::duration<double> duration = end - start;
+			double runtime = duration.count();
+			// 打印运行时长
+			std::cout << "函数运行时长: " << runtime << " 秒" << std::endl;
+
+			std::string outputname = "output.jpg";
+			outputname = std::to_string(i)+ outputname;
+			// 保存处理后的图片
+			imwrite(outputname, output);
+		}
+
+
+	printf("图片处理完成\n");
+	system("pause");
+
+}
+
+//####################################################
+

@@ -1,0 +1,8 @@
+path: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection\traffic_light_detection_coco\
+train: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection\traffic_light_detection_coco\train\images
+val: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection\traffic_light_detection_coco\val\images
+test: D:\迅雷下载\AI数据集汇总\红绿灯检测数据集\traffic_light_detection\traffic_light_detection\traffic_light_detection_coco\val\images
+
+nc: 7
+names: ['GC_1', 'RC_1','YC_1', 'GAF_1','GAL_1','GAR_1','RAL_1']
+

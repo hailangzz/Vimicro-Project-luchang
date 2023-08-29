@@ -1,0 +1,13 @@
+
+1.稀疏化训练铝片坏点检测：
+python train.py --batch 2 --epochs 5 --weights weights/yolov5s.pt --data data/aluminum_bad_points.yaml --cfg models/yolov5s.yaml --name coco_sparsity --optimizer AdamW --bn_sparsity --sparsity_rate 0.00005 --device 0
+
+2.对模型进行剪枝保存
+python prune.py --percent 0.6 --weights runs/train/coco_sparsity8/weights/last.pt --data data/aluminum_bad_points.yaml --cfg models/yolov5s.yaml
+    导出剪枝模型：
+    python export.py --weights ./runs/val/exp19/pruned_model.pt --device 0
+    python export.py --weights ./runs/val/exp21/pruned_model.pt --device 0
+
+3.在训练剪枝模型：
+    python train.py  --batch 2 --epochs 10 --weights runs/val/exp19/pruned_model.pt  --data data/aluminum_bad_points.yaml --cfg models/yolov5s.yaml --name coco_ft --device 0 --optimizer AdamW --ft_pruned_model --hyp hyp.finetune_prune.yaml
+    导出onnx模型: python export.py --weights ./runs\train\coco_ft/weights/best.pt --device 0

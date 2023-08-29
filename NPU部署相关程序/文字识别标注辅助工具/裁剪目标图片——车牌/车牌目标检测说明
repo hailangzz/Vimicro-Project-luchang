@@ -1,0 +1,6 @@
+1.车牌目标剪切项目，是结合npumodel精确率、召回率项目做的。
+    D:\PycharmProgram\sample_yolov5_calMAP
+
+项目流程：
+    1.使用开发板sample_yolov5_calMAP项目，编译运行npumodel，检测images文件夹下的原始图像。获取目标检测的result检测标注文件。
+    2.使用 1.裁剪-车牌检测.py 程序工具将result检测框体从，images原始图中扣取目标图像，并保存到指定路径下（D:\迅雷下载\AI数据集汇总\汽车拍照检测识别\detect_car_brand_crops）

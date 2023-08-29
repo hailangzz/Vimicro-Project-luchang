@@ -1,0 +1,10 @@
+1. 图片样本名称为标注信息的样本集（用来训练LPR net识别网络）：D:\迅雷下载\AI数据集汇总\汽车拍照检测识别\rec_car_brand_train_database_focus8_LPR
+2. 6.3整理清理车牌识别错误样本图片-origin.py ：这个文件是用来检索Total_real_rec_labels.txt（全部识别标注文件中），其对应的图片文件是否能正常打开。
+3. 6.2筛选PaddleOCR识别的车牌文本标签_SZ_DVR.py：
+
+
+
+
+
+
+

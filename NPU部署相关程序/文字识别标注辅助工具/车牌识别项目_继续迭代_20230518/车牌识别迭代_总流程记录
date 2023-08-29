@@ -1,0 +1,25 @@
+1. 212服务器上的车牌识别样本集信息
+    车牌图片：/home/zhangzhuo/git_workspace/PytorchOCR_copy/rec_car_brand_train_database_focus8/images    数量：539885
+    标注文件：/home/zhangzhuo/git_workspace/PytorchOCR_copy/rec_car_brand_train_database_focus8/Total_real_rec_labels.txt    标注数量：461294
+
+2. 针对政云训练的识别模型，现在开始做整理工作
+
+    1.发现用paddleocr v2识别模型做的标注文件可能有些错误标注情况，因此先测试下是否有这个问题：（在PaddleOCR-release-2.5项目里测试运行）
+        提取的部分：政云测试错误的图像样本：       D:\迅雷下载\AI数据集汇总\汽车拍照检测识别\车牌识别模型预测错误图片汇总
+        python3 tools/infer/predict_rec.py --image_dir="D:\迅雷下载\AI数据集汇总\汽车拍照检测识别\车牌识别模型预测错误图片汇总" --rec_model_dir="./inference/ch_ppocr_server_v2.0_rec_infer" --use_gpu=False --rec_image_shape=3,32,320  --use_space_char=False
+        注：以上测试完之后，发现paddleocr模型，对车牌检测的效果确实没有自训练的pytorchOCR预测效果好。
+
+    2.此时用pytorchOCR来测试下对错误样本的预测结果。
+        注：原始的pytorchOCR项目无法直接运行，现已经调试通过：（以下可直接运行）
+            D:\中星微人工智能工作\人车非项目\PytorchOCR_copy\plate_rec_onnx_infer.py
+            D:\中星微人工智能工作\人车非项目\PytorchOCR_copy\plate_rec_pytorch_infer.py
+        对比研究后得出的结论：
+            1.运行完对比后，发现结论。不同的识别模型效果均不一致，每个模型都有其擅长的场景，就连paddleOCR模型也是一样。
+            2.paddleOCR在打标签是，最好用全流程条件来标注，这样准确性更高一些。
+
+
+
+
+
+
+

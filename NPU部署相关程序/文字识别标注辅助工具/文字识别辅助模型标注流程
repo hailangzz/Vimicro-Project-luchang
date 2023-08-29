@@ -1,0 +1,37 @@
+注：文字识别辅助标注工具使用paddleOCR模型程序，来对文字样本进行辅助标注任务
+
+1.先检测出车牌文本框：（只保存检测框内图像）D:\Git_WareHouse\yolov5-master
+
+    （python ./detect_origin.py --weights ./runs/train/car_band_model/weights/best_1024.pt   --source  ./test_car_brand --img-size 1024 --exist-ok --name test_car_brand --save-crop
+    D:\Git_WareHouse\yolov5-master\runs\detect\test_car_brand\crops\car_brand）
+    （注：这里为了配合之后的识别模型，因此直接使用全精度网络模型，来检测车牌目标框）
+
+    # 检测SZ_DVR车牌数据集：
+        python ./detect_origin.py --weights ./runs/train/car_band_model/weights/car_brand_focus.pt  --source  D:\迅雷下载\AI数据集汇总\Vimicro_DVR_Dataset\extract_detect_car_brand\extract_detect_car_brand\train\images --img-size 576 1024 --name SZ_car_brand --nosave --save-txt
+
+    # 检测人车非_监控车牌数据集：
+        python ./detect_origin.py --weights ./runs/train/car_band_model/weights/car_brand_focus.pt  --source  D:\迅雷下载\AI数据集汇总\人车非数据及项目\images1\images_1 --img-size 576 1024 --name person_car_other_brand --nosave --save-txt
+2.自定义函数扣取车牌样本图片：
+    D:\中星微人工智能工作\Vimicro-Project\NPU部署相关程序\文字识别标注辅助工具\裁剪目标图片——车牌
+    (注：框架自带的检测框裁剪功能，对目标框有放大操作。因此在进行后续识别训练时，不可直接使用框架裁剪出的目标图)
+
+3.使用paddleOCR识别检测出的车牌标签：
+    文本检测命令：python3 tools/infer/predict_det.py --image_dir="./doc/imgs/00018069.jpg" --det_model_dir="./ch_PP-OCRv3_det_infer/"
+    （参数默认设置为limit_type='max', det_limit_side_len=960。表示网络输入图像的最长边不能超过960， 如果超过这个值，会对图像做等宽比的resize操作，确保最长边为det_limit_side_len。 设置为limit_type='min', det_limit_side_len=960 则表示限制图像的最短边为960。）
+
+    文本识别命令：python3 tools/infer/predict_rec.py --image_dir="./doc/imgs_words/ch/word_4.jpg" --rec_model_dir="./ch_PP-OCRv3_rec_infer/"
+    （PP-OCRv3的识别模型使用的输入shape为3,48,320, 如果使用其他识别模型，则需根据模型设置参数--rec_image_shape）
+
+!!! 汇总最佳的paddleOCR文本检测识别模型检测命令为：效果非常好（将用以下命令来做车牌识别文本标注工具）
+    # 完整检测+角度转换+识别命令：
+    python3 tools/infer/predict_system.py --image_dir="D:\Git_WareHouse\yolov5-master\runs\detect\test_car_brand\crops\car_brand\01-93_89-321&549_477&607-475&619_322&597_330&541_483&563-0_0_21_29_25_25_7-165-9.jpg" --det_model_dir="./inference/ch_ppocr_server_v2.0_det_infer/" --cls_model_dir="./inference/ch_ppocr_mobile_v2.0_cls_infer" --rec_model_dir="./inference/ch_ppocr_server_v2.0_rec_infer/" --use_angle_cls=true --rec_image_shape=3,32,320
+    (注：由于车牌已经使用 全精度网络检测扣取过。因此在做识别标注时，直接使用paddleOCR识别模型就可以：python3 tools/infer/predict_rec.py --image_dir="D:\迅雷下载\AI数据集汇总\汽车拍照检测识别\detect_car_brand_crops\detect_SZ_DVR_car_brand_crops_focus_8_pt" --rec_model_dir="./inference/ch_ppocr_server_v2.0_rec_infer" --use_gpu=False --rec_image_shape=3,32,320  --use_space_char=False)
+    python3 tools/infer/predict_rec.py --image_dir="D:\迅雷下载\AI数据集汇总\汽车拍照检测识别\detect_car_brand_crops\detect_SZ_DVR_car_brand_crops_focus_8_pt" --rec_model_dir="./inference/ch_ppocr_server_v2.0_rec_infer" --use_gpu=False --rec_image_shape=3,32,320  --use_space_char=False
+
+4.对paddleOCR识别标注文件进行整理，提出预测不准确（预测置信度小于90，且开头字符不在指定省份，长度不满足车牌要求的样本）
+    程序文件：D:\中星微人工智能工作\Vimicro-Project\NPU部署相关程序\文字识别标注辅助工具\筛选PaddleOCR识别的车牌文本标签.py
+5.对CPDD_COCO车牌检测、识别数据集，车牌扣取样本进行整理。
+
+
+
+

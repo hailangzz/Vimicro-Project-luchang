@@ -1,0 +1,21 @@
+
+# 使用bdd模型辅助标注交通灯样本：
+    1.使用YOLO预训练模型获取样本集的初次标注文件：
+        D:\Git_WareHouse\yolov5-master
+        # 以下detect.py为自定义筛选标注的检测程序
+        python ./detect.py --weights ./runs/train/traffic_light_model/weights/best_bdd.pt   --source  ./traffic_light_test_DVR --img-size 576 1024 --nosave --save-txt
+
+    2.使用“0.根据coco标注信息绘制检测框.py”来查看预训练模型的检测框效果如何
+
+    3.使用“1.预训练Label转为实际项目label.py”将预训练标注文件转为项目真实标注文件。
+    （注：要使用1.jpg、1.txt样例标注图片，及class.txt放在保存标注的文件夹下）
+
+
+# 使用bdd模型辅助标注车牌检测识别样本：
+    1.使用YOLO预训练模型获取样本集的初次标注文件：
+        D:\Git_WareHouse\yolov5-master
+        # 以下detect.py为自定义筛选标注的检测程序
+        python ./detect_car.py --weights ./runs/train/traffic_light_model/weights/best_bdd.pt   --source  ./test_car_brand --img-size 576 1024 --save-crop --nosave --save-txt
+    2.抠图出来保存在了：D:\Git_WareHouse\yolov5-master\detect\exp\crops路径下；
+
+        

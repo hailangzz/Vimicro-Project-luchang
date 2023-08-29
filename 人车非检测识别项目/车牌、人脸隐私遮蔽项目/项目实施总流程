@@ -1,0 +1,118 @@
+1.汇总项目使用的样本图片
+
+    样本图片来源：
+    1.上海车载监控样本图：/home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai/SH_1080p_jpg
+    2.深圳车载监控样本图：/home/database/IntelligentTransportation/Vimicro_Image_dataset
+    3.人车非监控样本图：/home/zhangzhuo/git_workspace/yolov5/datasets/PersonCarAndOthers                           48997
+
+    汇总上海样本：/home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai
+        copy_image_to_dest_folder.py
+        或者：cp -r  /home/database/IntelligentTransportation/SH_1080p_jpg/ /home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai
+        样本量：28933  （查询当前目录样本个数：ls -l | grep "^-" | wc -l）
+
+    验证预训练模型效果：在本地主机验证（效果满足要求）
+        D:\Git_WareHouse\yolov5-master\我的测试脚本：
+            python ./detect_origin.py --weights ./runs/train/traffic_light_model/weights/best_bdd.pt   --source  ./test_DVR_all_classify --img-size 576 1024 --name test_DVR_all_classify --save-txt
+
+
+2.使用训练好的bdd100k模型，对以上严格本进行检测标注，生成标注文件
+  预训练模型：best_bdd.pt
+  检测命令： 上海样本
+    python3 ./detect.py \
+      --weights ./pretrain_model/best_bdd.pt  \
+      --source  /home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai/SH_1080p_jpg/ \
+      --img-size 576 1024 \
+      --nosave   --exist-ok --save-txt \
+      --project detect_DVR_Vimicro_Image --name shanghai_select
+  检测命令：深圳样本
+    python3 ./detect.py \
+      --weights ./pretrain_model/best_bdd.pt  \
+      --source  /home/zhangzhuo/total_dataset/Vimicro_Image_dataset/ \
+      --img-size 576 1024 \
+      --nosave   --exist-ok --save-txt \
+      --project detect_DVR_Vimicro_Image --name shenzhen_select
+  ``````````````````````````````````````````````````````````````````````````````````````````````````````
+  # 车牌样本标注
+  预训练模型：best_1024.pt (车牌检测模型)
+    python ./detect.py \
+       --weights ./pretrain_model/best_1024.pt   \
+       --source  /home/zhangzhuo/total_dataset/Vimicro_Image_dataset/ \
+       --img-size 576 1024 \
+       --exist-ok \
+       --nosave   --exist-ok --save-txt \
+       --project detect_DVR_Vimicro_Image --name shenzhen_car_brand
+
+    python ./detect.py \
+       --weights ./pretrain_model/best_1024.pt   \
+       --source  /home/zhangzhuo/total_dataset/Vimicro_DVR_ShangHai/SH_1080p_jpg/ \
+       --img-size 576 1024 \
+       --exist-ok \
+       --nosave   --exist-ok --save-txt \
+       --project detect_DVR_Vimicro_Image --name shanghai_car_brand
+
+    python ./detect.py \
+       --weights ./pretrain_model/best_1024.pt \
+       --source  /home/zhangzhuo/git_workspace/yolov5/datasets/PersonCarAndOthers/train/images \
+       --img-size 576 1024 \
+       --exist-ok \
+       --nosave   --exist-ok --save-txt \
+       --project detect_DVR_Vimicro_Image --name person_car_other_car_brand
+
+# 检测类别为：13种
+    names:{
+            'person':0,'rider':1,'car':2,'bus':3,
+            'truck':4,'bike':5,'motor':6,'tl_green':7,
+            'tl_red':8,'tl_yellow':9,'tl_none':10,
+            't_sign':11,'train':12
+          }
+--------------------------------------------------------------------------------------------------------
+隐私遮蔽样本标注分类：
+车牌标注样本：
+    深圳DVR车牌训练集：/home/zhangzhuo/git_workspace/yolov5/datasets/extract_detect_car_brand/                     52425
+    上海DVR车牌训练集：/home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shanghai_car_brand/           14060
+    人车非车牌训练集： /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/person_car_other_car_brand/   27204
+
+    人车非人脸训练集：/home/zhangzhuo/git_workspace/yolov5/detect_person_car_other_Vimicro_Image/face_detect/      27468
+    上海DVR人脸训练集：/home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shanghai_face_detect/          1876
+    深圳DVR人脸训练集：/home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shenzhen_face_detect/         10082
+
+---------------------------------------------------------------------------------------------------------
+隐私遮蔽数据集：PrivacyMaskingCarPlateFaceDatasets     100376 （注：213，服务器上）
+    1.  先将所有车牌图片、标签复制到车牌汇总数据集目录下：
+        /home/database/IntelligentTransportation/CarPlateTotalDatasets     (train/imags、labels)
+
+        cp -r /home/zhangzhuo/git_workspace/yolov5/datasets/extract_detect_car_brand/train/images/ /home/database/IntelligentTransportation/CarPlateTotalDatasets/train/images
+        cp -r /home/zhangzhuo/git_workspace/yolov5/datasets/extract_detect_car_brand/train/labels/ /home/database/IntelligentTransportation/CarPlateTotalDatasets/train/labels
+
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shanghai_car_brand/images/ /home/database/IntelligentTransportation/CarPlateTotalDatasets/train/images
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shanghai_car_brand/labels/ /home/database/IntelligentTransportation/CarPlateTotalDatasets/train/labels
+
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/person_car_other_car_brand/images/ /home/database/IntelligentTransportation/CarPlateTotalDatasets/train/images
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/person_car_other_car_brand/labels/ /home/database/IntelligentTransportation/CarPlateTotalDatasets/train/labels
+
+    2.  先将所有人脸图片、标签复制到人脸汇总数据集目录下：
+        /home/database/IntelligentTransportation/PersonFaceTotalDatasets     (train/imags、labels)
+cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shenzhen_face_detect/labels/ /home/database/IntelligentTransportation/PersonFaceTotalDatasets/train/labels
+
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_person_car_other_Vimicro_Image/face_detect/images/ /home/database/IntelligentTransportation/PersonFaceTotalDatasets/train/images
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_person_car_other_Vimicro_Image/face_detect/labels/ /home/database/IntelligentTransportation/PersonFaceTotalDatasets/train/labels
+
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shanghai_face_detect/images/ /home/database/IntelligentTransportation/PersonFaceTotalDatasets/train/images
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shanghai_face_detect/labels/ /home/database/IntelligentTransportation/PersonFaceTotalDatasets/train/labels
+
+        cp -r /home/zhangzhuo/git_workspace/yolov5/detect_DVR_Vimicro_Image/shenzhen_face_detect/images/ /home/database/IntelligentTransportation/PersonFaceTotalDatasets/train/images
+
+
+
+
+
+
+3.筛选标注文件，合并图片、标注构成训练样本
+    注：可以先只做标注文件的合并换换存储。样本图片的话，可能等到最终的多目标合并标签存储，并整合后，再统一拷贝复制图片到同一个项目中。
+    使用如下程序：
+        D:\中星微人工智能工作\Vimicro-Project\NPU部署相关程序\整合多标签训练集—合并统一样本集\1.整合多个标签样本集—合并样本.py
+
+4.训练模型
+python -m torch.distributed.launch --nproc_per_node 3 train.py --data ./data/PrivacyMaskingCarPlateFace.yaml --cfg ./models/yolov5s_focus_p3_PrivacyMaskingCarPlateFace.yaml --weights ./pretrain_model/car_brand_focus.pt --batch-size 150 --img-size 1024 --epochs 150 --noval --device 0,1,2 --project ./runs/train/ --name PrivacyMasking
+
+
