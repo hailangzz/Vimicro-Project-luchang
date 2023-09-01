@@ -1,0 +1,3 @@
+1. 量化ONNX模型前，其inputs_name 必须保存为“inputs”
+2. 模型量化时，使用的数据集，其尺寸的大小应该和模型大小保持一致。Resize(640, interpolation="bilinear"),
+3. 模型的dateloder 中batch_size,优势要求必须是1，
