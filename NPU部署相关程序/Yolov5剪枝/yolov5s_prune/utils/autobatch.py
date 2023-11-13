@@ -24,12 +24,12 @@ def autobatch(model, imgsz=640, fraction=0.9, batch_size=16):
     # Usage:
     #     import torch
     #     from utils.autobatch import autobatch
-    #     model = torch.hub.load('ultralytics/yolov5', 'yolov5s', autoshape=False)
-    #     print(autobatch(model))
+    #     models = torch.hub.load('ultralytics/yolov5', 'yolov5s', autoshape=False)
+    #     print(autobatch(models))
 
     prefix = colorstr('AutoBatch: ')
     LOGGER.info(f'{prefix}Computing optimal batch size for --imgsz {imgsz}')
-    device = next(model.parameters()).device  # get model device
+    device = next(model.parameters()).device  # get models device
     if device.type == 'cpu':
         LOGGER.info(f'{prefix}CUDA not detected, using default CPU batch-size {batch_size}')
         return batch_size

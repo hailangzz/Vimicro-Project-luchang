@@ -200,7 +200,7 @@ class Loggers():
             self.comet_logger.on_val_start()
 
     def on_val_image_end(self, pred, predn, path, names, im):
-        # Callback runs on val image end
+        # Callback runs on val images end
         if self.wandb:
             self.wandb.val_one_image(pred, predn, path, names, im)
         if self.clearml:
@@ -249,14 +249,14 @@ class Loggers():
             self.wandb.end_epoch(best_result=best_fitness == fi)
 
         if self.clearml:
-            self.clearml.current_epoch_logged_images = set()  # reset epoch image limit
+            self.clearml.current_epoch_logged_images = set()  # reset epoch images limit
             self.clearml.current_epoch += 1
 
         if self.comet_logger:
             self.comet_logger.on_fit_epoch_end(x, epoch=epoch)
 
     def on_model_save(self, last, epoch, final_epoch, best_fitness, fi):
-        # Callback runs on model save event
+        # Callback runs on models save event
         if (epoch + 1) % self.opt.save_period == 0 and not final_epoch and self.opt.save_period != -1:
             if self.wandb:
                 self.wandb.log_model(last.parent, self.opt, epoch, fi, best_model=best_fitness == fi)
@@ -269,7 +269,7 @@ class Loggers():
             self.comet_logger.on_model_save(last, epoch, final_epoch, best_fitness, fi)
 
     def on_train_end(self, last, best, epoch, results):
-        # Callback runs on training end, i.e. saving best model
+        # Callback runs on training end, i.e. saving best models
         if self.plots:
             plot_results(file=self.save_dir / 'results.csv')  # save results.png
         files = ['results.png', 'confusion_matrix.png', *(f'{x}_curve.png' for x in ('F1', 'PR', 'P', 'R'))]
@@ -286,7 +286,7 @@ class Loggers():
             # Calling wandb.log. TODO: Refactor this into WandbLogger.log_model
             if not self.opt.evolve:
                 wandb.log_artifact(str(best if best.exists() else last),
-                                   type='model',
+                                   type='models',
                                    name=f'run_{self.wandb.wandb_run.id}_model',
                                    aliases=['latest', 'best', 'stripped'])
             self.wandb.finish_run()
@@ -366,14 +366,14 @@ class GenericLogger:
             self.wandb.log({name: [wandb.Image(str(f), caption=f.name) for f in files]}, step=epoch)
 
     def log_graph(self, model, imgsz=(640, 640)):
-        # Log model graph to all loggers
+        # Log models graph to all loggers
         if self.tb:
             log_tensorboard_graph(self.tb, model, imgsz)
 
     def log_model(self, model_path, epoch=0, metadata={}):
-        # Log model to all loggers
+        # Log models to all loggers
         if self.wandb:
-            art = wandb.Artifact(name=f"run_{wandb.run.id}_model", type="model", metadata=metadata)
+            art = wandb.Artifact(name=f"run_{wandb.run.id}_model", type="models", metadata=metadata)
             art.add_file(str(model_path))
             wandb.log_artifact(art)
 
@@ -384,11 +384,11 @@ class GenericLogger:
 
 
 def log_tensorboard_graph(tb, model, imgsz=(640, 640)):
-    # Log model graph to TensorBoard
+    # Log models graph to TensorBoard
     try:
         p = next(model.parameters())  # for device, type
         imgsz = (imgsz, imgsz) if isinstance(imgsz, int) else imgsz  # expand
-        im = torch.zeros((1, 3, *imgsz)).to(p.device).type_as(p)  # input image (WARNING: must be zeros, not empty)
+        im = torch.zeros((1, 3, *imgsz)).to(p.device).type_as(p)  # input images (WARNING: must be zeros, not empty)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')  # suppress jit trace warning
             tb.add_graph(torch.jit.trace(de_parallel(model), im, strict=False), [])

@@ -6,8 +6,8 @@
 #
 # cut_info = [box_info[0],box_info[2],box_info[1],box_info[3],]
 #
-# image = Image.open(image_path)
-# cropped = image.crop(cut_info)
+# images = Image.open(image_path)
+# cropped = images.crop(cut_info)
 # cropped.save("./leftlower_pil_cut.jpg")
 
 bbox = [0.501823,0.78287,0.0713542,0.0472222]

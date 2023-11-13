@@ -19,10 +19,10 @@ def test(data,
          dataloader=None,
          save_dir='',
          merge=False):
-    # Initialize/load model and set device
+    # Initialize/load models and set device
     training = model is not None
     if training:  # called by train_yolov5.py
-        device = next(model.parameters()).device  # get model device
+        device = next(model.parameters()).device  # get models device
 
     else:  # called directly
         device = torch_utils.select_device(opt.device, batch_size=batch_size)
@@ -32,13 +32,13 @@ def test(data,
         for f in glob.glob(str(Path(save_dir) / 'test_batch*.jpg')):
             os.remove(f)
 
-        # Load model
-        model = attempt_load(weights, map_location=device)  # load FP32 model
+        # Load models
+        model = attempt_load(weights, map_location=device)  # load FP32 models
         imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
 
         # Multi-GPU disabled, incompatible with .half() https://github.com/ultralytics/yolov5/issues/99
         # if device.type != 'cpu' and torch.cuda.device_count() > 1:
-        #     model = nn.DataParallel(model)
+        #     models = nn.DataParallel(models)
 
     # Half
     half = device.type != 'cpu' and torch.cuda.device_count() == 1  # half precision only supported on single-GPU
@@ -48,7 +48,7 @@ def test(data,
     # Configure
     model.eval()
     with open(data) as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+        data = yaml.load(f, Loader=yaml.FullLoader)  # models dict
     nc = 1 if single_cls else int(data['nc'])  # number of classes
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
     iouv = iouv[0].view(1)  # comment for mAP@0.5:0.95
@@ -79,13 +79,13 @@ def test(data,
 
         # Disable gradients
         with torch.no_grad():
-            # Run model
+            # Run models
             t = torch_utils.time_synchronized()
             inf_out, train_out = model(img, augment=augment)  # demo and training outputs
             t0 += torch_utils.time_synchronized() - t
 
             # Compute loss
-            if training:  # if model has loss hyperparameters
+            if training:  # if models has loss hyperparameters
                 loss += compute_loss([x.float() for x in train_out], targets, model)[1][:3]  # GIoU, obj, cls
 
             # Run NMS
@@ -93,7 +93,7 @@ def test(data,
             output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres, merge=merge)
             t1 += torch_utils.time_synchronized() - t
 
-        # Statistics per image
+        # Statistics per images
         for si, pred in enumerate(output):
             labels = targets[targets[:, 0] == si, 1:]
             nl = len(labels)
@@ -109,7 +109,7 @@ def test(data,
             # with open('test.txt', 'a') as file:
             #    [file.write('%11.5g' * 7 % tuple(x) + '\n') for x in pred]
 
-            # Clip boxes to image bounds
+            # Clip boxes to images bounds
             clip_coords(pred, (height, width))
 
             # Append to pycocotools JSON dictionary
@@ -151,7 +151,7 @@ def test(data,
                             if d not in detected:
                                 detected.append(d)
                                 correct[pi[j]] = ious[j]>iouv # iou_thres is 1xn
-                                if len(detected) == nl:  # all targets already located in image
+                                if len(detected) == nl:  # all targets already located in images
                                     break
 
             # Append statistics (correct, conf, pcls, tcls)
@@ -186,7 +186,7 @@ def test(data,
     # Print speeds
     t = tuple(x / seen * 1E3 for x in (t0, t1, t0 + t1)) + (imgsz, imgsz, batch_size)  # tuple
     if not training:
-        print('Speed: %.1f/%.1f/%.1f ms demo/NMS/total per %gx%g image at batch-size %g' % t)
+        print('Speed: %.1f/%.1f/%.1f ms demo/NMS/total per %gx%g images at batch-size %g' % t)
 
     # Save JSON
     if save_json and map50 and len(jdict):
@@ -206,7 +206,7 @@ def test(data,
             cocoDt = cocoGt.loadRes(f)  # initialize COCO pred api
 
             cocoEval = COCOeval(cocoGt, cocoDt, 'bbox')
-            cocoEval.params.imgIds = imgIds  # image IDs to evaluate
+            cocoEval.params.imgIds = imgIds  # images IDs to evaluate
             cocoEval.evaluate()
             cocoEval.accumulate()
             cocoEval.summarize()
@@ -225,9 +225,9 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test_yolov5.py')
-    parser.add_argument('--weights', nargs='+', type=str, default='', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default='', help='models.pt path(s)')
     parser.add_argument('--data', type=str, default='', help='*.data path')
-    parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
+    parser.add_argument('--batch-size', type=int, default=32, help='size of each images batch')
     parser.add_argument('--img-size', type=int, default=640, help='demo size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.65, help='IOU threshold for NMS')

@@ -2,7 +2,7 @@
 
 # Parameters
 nc: 80  # number of classes
-depth_multiple: 1.0  # model depth multiple
+depth_multiple: 1.0  # models depth multiple
 width_multiple: 1.0  # layer channel multiple
 anchors: 3  # auto-anchor evolves 3 anchors per P output layer
 

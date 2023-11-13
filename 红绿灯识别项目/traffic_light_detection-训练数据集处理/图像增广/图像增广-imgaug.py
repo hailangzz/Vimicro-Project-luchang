@@ -255,7 +255,7 @@ for count in range(100):
         filename = str(count) + str(index) + '.jpg'
         # 保存图片
         cv2.imwrite(savedpath + filename, images_aug[index])
-        print('image of count%s index%s has been writen' % (count, index))
+        print('images of count%s index%s has been writen' % (count, index))
 
 
 

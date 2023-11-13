@@ -84,7 +84,7 @@ def eveluate( tcls, tbox, pred):
                 continue
             detected.append(d)
             correct[pi[j]] = ious[j] > iouv  # iou_thres is 1xn
-            if len(detected) == label_num:  # all targets already located in image
+            if len(detected) == label_num:  # all targets already located in images
                 break
     return correct
 

@@ -23,7 +23,7 @@ import random
 
 def get_thr_value(path='./data/ccpd.yaml'): # 获取标注框的长宽比范围值
     with open(path, 'rb') as f:
-        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
         print(data_dict)
 
     total_images_list = os.listdir(data_dict['train'])
@@ -46,7 +46,7 @@ def get_thr_value(path='./data/ccpd.yaml'): # 获取标注框的长宽比范围�
 
 def get_thr_coco_value(path='./data/ccpd.yaml'): # 获取标注框的长宽比范围值
     with open(path, 'rb') as f:
-        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
         print(data_dict)
 
     total_images_list = os.listdir(data_dict['train']+'/../labels')
@@ -81,7 +81,7 @@ def kmean_anchors(path='./data/ccpd.yaml', n=9, img_size=640, thr=4.0, gen=1000,
         Arguments:
             path: path to dataset *.yaml, or a loaded dataset
             n: number of anchors
-            img_size: image size used for training
+            img_size: images size used for training
             thr: anchor-label wh ratio threshold hyperparameter hyp['anchor_t'] used for training, default=4.0
             gen: generations to evolve anchors using genetic algorithm
 
@@ -128,7 +128,7 @@ def kmean_anchors(path='./data/ccpd.yaml', n=9, img_size=640, thr=4.0, gen=1000,
 
     if isinstance(path, str):  # *.yaml file
         with open(path,'rb') as f:
-            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
             print(data_dict)
         from utils.datasets import LoadImagesAndLabels
         dataset = LoadImagesAndLabels(data_dict['train'], augment=True, rect=True)

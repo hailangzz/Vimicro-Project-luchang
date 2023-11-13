@@ -343,13 +343,13 @@ class DetectMultiBackend(nn.Module):
 
         if pt:  # PyTorch
             model = attempt_load(weights if isinstance(weights, list) else w, device=device, inplace=True, fuse=fuse)
-            stride = max(int(model.stride.max()), 32)  # model stride
+            stride = max(int(model.stride.max()), 32)  # models stride
             names = model.module.names if hasattr(model, 'module') else model.names  # get class names
             model.half() if fp16 else model.float()
             self.model = model  # explicitly assign for to(), cpu(), cuda(), half()
         elif jit:  # TorchScript
             LOGGER.info(f'Loading {w} for TorchScript inference...')
-            extra_files = {'config.txt': ''}  # model metadata
+            extra_files = {'config.txt': ''}  # models metadata
             model = torch.jit.load(w, _extra_files=extra_files, map_location=device)
             model.half() if fp16 else model.float()
             if extra_files['config.txt']:  # load metadata dict
@@ -461,7 +461,7 @@ class DetectMultiBackend(nn.Module):
                 interpreter = Interpreter(model_path=w, experimental_delegates=[load_delegate(delegate)])
             else:  # TFLite
                 LOGGER.info(f'Loading {w} for TensorFlow Lite inference...')
-                interpreter = Interpreter(model_path=w)  # load TFLite model
+                interpreter = Interpreter(model_path=w)  # load TFLite models
             interpreter.allocate_tensors()  # allocate
             input_details = interpreter.get_input_details()  # inputs
             output_details = interpreter.get_output_details()  # outputs
@@ -534,7 +534,7 @@ class DetectMultiBackend(nn.Module):
                     i = self.model.get_binding_index(name)
                     self.bindings[name].data.resize_(tuple(self.context.get_binding_shape(i)))
             s = self.bindings['images'].shape
-            assert im.shape == s, f"input size {im.shape} {'>' if self.dynamic else 'not equal to'} max model size {s}"
+            assert im.shape == s, f"input size {im.shape} {'>' if self.dynamic else 'not equal to'} max models size {s}"
             self.binding_addrs['images'] = int(im.data_ptr())
             self.context.execute_v2(list(self.binding_addrs.values()))
             y = [self.bindings[x].data for x in sorted(self.output_names)]
@@ -542,7 +542,7 @@ class DetectMultiBackend(nn.Module):
             im = im.cpu().numpy()
             im = Image.fromarray((im[0] * 255).astype('uint8'))
             # im = im.resize((192, 320), Image.ANTIALIAS)
-            y = self.model.predict({'image': im})  # coordinates are xywh normalized
+            y = self.model.predict({'images': im})  # coordinates are xywh normalized
             if 'confidence' in y:
                 box = xywh2xyxy(y['coordinates'] * [[w, h, w, h]])  # xyxy pixels
                 conf, cls = y['confidence'].max(1), y['confidence'].argmax(1).astype(np.float)
@@ -564,7 +564,7 @@ class DetectMultiBackend(nn.Module):
                 y = self.frozen_func(x=self.tf.constant(im))
             else:  # Lite or Edge TPU
                 input = self.input_details[0]
-                int8 = input['dtype'] == np.uint8  # is TFLite quantized uint8 model
+                int8 = input['dtype'] == np.uint8  # is TFLite quantized uint8 models
                 if int8:
                     scale, zero_point = input['quantization']
                     im = (im / scale + zero_point).astype(np.uint8)  # de-scale
@@ -589,7 +589,7 @@ class DetectMultiBackend(nn.Module):
         return torch.from_numpy(x).to(self.device) if isinstance(x, np.ndarray) else x
 
     def warmup(self, imgsz=(1, 3, 640, 640)):
-        # Warmup model by running inference once
+        # Warmup models by running inference once
         warmup_types = self.pt, self.jit, self.onnx, self.engine, self.saved_model, self.pb, self.triton
         if any(warmup_types) and (self.device.type != 'cpu' or self.triton):
             im = torch.empty(*imgsz, dtype=torch.half if self.fp16 else torch.float, device=self.device)  # input
@@ -597,8 +597,8 @@ class DetectMultiBackend(nn.Module):
                 self.forward(im)  # warmup
 
     @staticmethod
-    def _model_type(p='path/to/model.pt'):
-        # Return model type from model path, i.e. path='path/to/model.onnx' -> type=onnx
+    def _model_type(p='path/to/models.pt'):
+        # Return models type from models path, i.e. path='path/to/models.onnx' -> type=onnx
         # types = [pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs, paddle]
         from export import export_formats
         from utils.downloads import is_url
@@ -621,13 +621,13 @@ class DetectMultiBackend(nn.Module):
 
 
 class AutoShape(nn.Module):
-    # YOLOv5 input-robust model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
+    # YOLOv5 input-robust models wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
     conf = 0.25  # NMS confidence threshold
     iou = 0.45  # NMS IoU threshold
     agnostic = False  # NMS class-agnostic
     multi_label = False  # NMS multiple labels per box
     classes = None  # (optional list) filter by class, i.e. = [0, 15, 16] for COCO persons, cats and dogs
-    max_det = 1000  # maximum number of detections per image
+    max_det = 1000  # maximum number of detections per images
     amp = False  # Automatic Mixed Precision (AMP) inference
 
     def __init__(self, model, verbose=True):
@@ -636,7 +636,7 @@ class AutoShape(nn.Module):
             LOGGER.info('Adding AutoShape... ')
         copy_attr(self, model, include=('yaml', 'nc', 'hyp', 'names', 'stride', 'abc'), exclude=())  # copy attributes
         self.dmb = isinstance(model, DetectMultiBackend)  # DetectMultiBackend() instance
-        self.pt = not self.dmb or model.pt  # PyTorch model
+        self.pt = not self.dmb or model.pt  # PyTorch models
         self.model = model.eval()
         if self.pt:
             m = self.model.model.model[-1] if self.dmb else self.model.model[-1]  # Detect()
@@ -644,7 +644,7 @@ class AutoShape(nn.Module):
             m.export = True  # do not output loss values
 
     def _apply(self, fn):
-        # Apply to(), cpu(), cuda(), half() to model tensors that are not parameters or registered buffers
+        # Apply to(), cpu(), cuda(), half() to models tensors that are not parameters or registered buffers
         self = super()._apply(fn)
         if self.pt:
             m = self.model.model.model[-1] if self.dmb else self.model.model[-1]  # Detect()
@@ -659,8 +659,8 @@ class AutoShape(nn.Module):
         # Inference from various sources. For size(height=640, width=1280), RGB images example inputs are:
         #   file:        ims = 'data/images/zidane.jpg'  # str or PosixPath
         #   URI:             = 'https://ultralytics.com/images/zidane.jpg'
-        #   OpenCV:          = cv2.imread('image.jpg')[:,:,::-1]  # HWC BGR to RGB x(640,1280,3)
-        #   PIL:             = Image.open('image.jpg') or ImageGrab.grab()  # HWC x(640,1280,3)
+        #   OpenCV:          = cv2.imread('images.jpg')[:,:,::-1]  # HWC BGR to RGB x(640,1280,3)
+        #   PIL:             = Image.open('images.jpg') or ImageGrab.grab()  # HWC x(640,1280,3)
         #   numpy:           = np.zeros((640,1280,3))  # HWC
         #   torch:           = torch.zeros(16,3,320,640)  # BCHW (scaled to size=640, 0-1 values)
         #   multiple:        = [Image.open('image1.jpg'), Image.open('image2.jpg'), ...]  # list of images
@@ -677,20 +677,20 @@ class AutoShape(nn.Module):
 
             # Pre-process
             n, ims = (len(ims), list(ims)) if isinstance(ims, (list, tuple)) else (1, [ims])  # number, list of images
-            shape0, shape1, files = [], [], []  # image and inference shapes, filenames
+            shape0, shape1, files = [], [], []  # images and inference shapes, filenames
             for i, im in enumerate(ims):
-                f = f'image{i}'  # filename
+                f = f'images{i}'  # filename
                 if isinstance(im, (str, Path)):  # filename or uri
                     im, f = Image.open(requests.get(im, stream=True).raw if str(im).startswith('http') else im), im
                     im = np.asarray(exif_transpose(im))
                 elif isinstance(im, Image.Image):  # PIL Image
                     im, f = np.asarray(exif_transpose(im)), getattr(im, 'filename', f) or f
                 files.append(Path(f).with_suffix('.jpg').name)
-                if im.shape[0] < 5:  # image in CHW
+                if im.shape[0] < 5:  # images in CHW
                     im = im.transpose((1, 2, 0))  # reverse dataloader .transpose(2, 0, 1)
                 im = im[..., :3] if im.ndim == 3 else cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)  # enforce 3ch input
                 s = im.shape[:2]  # HWC
-                shape0.append(s)  # image shape
+                shape0.append(s)  # images shape
                 g = max(size) / max(s)  # gain
                 shape1.append([int(y * g) for y in s])
                 ims[i] = im if im.data.contiguous else np.ascontiguousarray(im)  # update
@@ -728,7 +728,7 @@ class Detections:
         self.ims = ims  # list of images as numpy arrays
         self.pred = pred  # list of tensors pred[0] = (xyxy, conf, cls)
         self.names = names  # class names
-        self.files = files  # image filenames
+        self.files = files  # images filenames
         self.times = times  # profiling times
         self.xyxy = pred  # xyxy pixels
         self.xywh = [xyxy2xywh(x) for x in pred]  # xywh pixels
@@ -741,7 +741,7 @@ class Detections:
     def _run(self, pprint=False, show=False, save=False, crop=False, render=False, labels=True, save_dir=Path('')):
         s, crops = '', []
         for i, (im, pred) in enumerate(zip(self.ims, self.pred)):
-            s += f'\nimage {i + 1}/{len(self.pred)}: {im.shape[0]}x{im.shape[1]} '  # string
+            s += f'\nimages {i + 1}/{len(self.pred)}: {im.shape[0]}x{im.shape[1]} '  # string
             if pred.shape[0]:
                 for c in pred[:, -1].unique():
                     n = (pred[:, -1] == c).sum()  # detections per class
@@ -772,12 +772,12 @@ class Detections:
                 f = self.files[i]
                 im.save(save_dir / f)  # save
                 if i == self.n - 1:
-                    LOGGER.info(f"Saved {self.n} image{'s' * (self.n > 1)} to {colorstr('bold', save_dir)}")
+                    LOGGER.info(f"Saved {self.n} images{'s' * (self.n > 1)} to {colorstr('bold', save_dir)}")
             if render:
                 self.ims[i] = np.asarray(im)
         if pprint:
             s = s.lstrip('\n')
-            return f'{s}\nSpeed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {self.s}' % self.t
+            return f'{s}\nSpeed: %.1fms pre-process, %.1fms inference, %.1fms NMS per images at shape {self.s}' % self.t
         if crop:
             if save:
                 LOGGER.info(f'Saved results to {save_dir}\n')

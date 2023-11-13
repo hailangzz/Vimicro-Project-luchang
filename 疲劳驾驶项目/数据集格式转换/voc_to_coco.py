@@ -135,9 +135,9 @@ def parseXmlFilse(data_dir, json_save_path, split='train'):
             size[subelem.tag] = int(subelem.text)
 
         if file_name is not None and size['width'] is not None and file_name not in image_set:
-            # 添加coco['image'],返回当前图片ID
+            # 添加coco['images'],返回当前图片ID
             current_image_id = addImgItem(file_name, size)
-            print('add image with name: {}\tand\tsize: {}'.format(file_name, size))
+            print('add images with name: {}\tand\tsize: {}'.format(file_name, size))
         elif file_name in image_set:
             raise Exception('file_name duplicated')
         else:
@@ -195,7 +195,7 @@ def parseXmlFilse(data_dir, json_save_path, split='train'):
         os.makedirs(json_parent_dir)
     json.dump(coco, open(json_save_path, 'w'))
     print("class nums:{}".format(len(coco['categories'])))
-    print("image nums:{}".format(len(coco['images'])))
+    print("images nums:{}".format(len(coco['images'])))
     print("bbox nums:{}".format(len(coco['annotations'])))
 
 

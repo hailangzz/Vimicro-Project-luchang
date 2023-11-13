@@ -1,6 +1,6 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
-Export a YOLOv5 PyTorch model to other formats. TensorFlow exports authored by https://github.com/zldrobit
+Export a YOLOv5 PyTorch models to other formats. TensorFlow exports authored by https://github.com/zldrobit
 
 Format                      | `export.py --include`         | Model
 ---                         | ---                           | ---
@@ -115,7 +115,7 @@ def try_export(inner_func):
 
 @try_export
 def export_torchscript(model, im, file, optimize, prefix=colorstr('TorchScript:')):
-    # YOLOv5 TorchScript model export
+    # YOLOv5 TorchScript models export
     LOGGER.info(f'\n{prefix} starting export with torch {torch.__version__}...')
     f = file.with_suffix('.torchscript')
 
@@ -159,8 +159,8 @@ def export_onnx(model, im, file, opset, dynamic, simplify, prefix=colorstr('ONNX
         dynamic_axes=dynamic or None)
 
     # Checks
-    model_onnx = onnx.load(f)  # load onnx model
-    onnx.checker.check_model(model_onnx)  # check onnx model
+    model_onnx = onnx.load(f)  # load onnx models
+    onnx.checker.check_model(model_onnx)  # check onnx models
 
     # Metadata
     d = {'stride': int(max(model.stride)), 'names': model.names}
@@ -224,8 +224,8 @@ def export_coreml(model, im, file, int8, half, prefix=colorstr('CoreML:')):
     LOGGER.info(f'\n{prefix} starting export with coremltools {ct.__version__}...')
     f = file.with_suffix('.mlmodel')
 
-    ts = torch.jit.trace(model, im, strict=False)  # TorchScript model
-    ct_model = ct.convert(ts, inputs=[ct.ImageType('image', shape=im.shape, scale=1 / 255, bias=[0, 0, 0])])
+    ts = torch.jit.trace(model, im, strict=False)  # TorchScript models
+    ct_model = ct.convert(ts, inputs=[ct.ImageType('images', shape=im.shape, scale=1 / 255, bias=[0, 0, 0])])
     bits, mode = (8, 'kmeans_lut') if int8 else (16, 'linear') if half else (32, None)
     if bits < 32:
         if MACOS:  # quantization only supported on macOS
@@ -286,7 +286,7 @@ def export_engine(model, im, file, half, dynamic, simplify, workspace=4, verbose
 
     if dynamic:
         if im.shape[0] <= 1:
-            LOGGER.warning(f"{prefix} WARNING ⚠️ --dynamic model requires maximum --batch-size argument")
+            LOGGER.warning(f"{prefix} WARNING ⚠️ --dynamic models requires maximum --batch-size argument")
         profile = builder.create_optimization_profile()
         for inp in inputs:
             profile.set_shape(inp.name, (1, *im.shape[1:]), (max(1, im.shape[0] // 2), *im.shape[1:]), im.shape)
@@ -339,7 +339,7 @@ def export_saved_model(model,
         keras_model.save(f, save_format='tf')
     else:
         spec = tf.TensorSpec(keras_model.inputs[0].shape, keras_model.inputs[0].dtype)
-        m = tf.function(lambda x: keras_model(x))  # full model
+        m = tf.function(lambda x: keras_model(x))  # full models
         m = m.get_concrete_function(spec)
         frozen_func = convert_variables_to_constants_v2(m)
         tfm = tf.Module()
@@ -361,7 +361,7 @@ def export_pb(keras_model, file, prefix=colorstr('TensorFlow GraphDef:')):
     LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
     f = file.with_suffix('.pb')
 
-    m = tf.function(lambda x: keras_model(x))  # full model
+    m = tf.function(lambda x: keras_model(x))  # full models
     m = m.get_concrete_function(tf.TensorSpec(keras_model.inputs[0].shape, keras_model.inputs[0].dtype))
     frozen_func = convert_variables_to_constants_v2(m)
     frozen_func.graph.as_graph_def()
@@ -417,8 +417,8 @@ def export_edgetpu(file, prefix=colorstr('Edge TPU:')):
     ver = subprocess.run(cmd, shell=True, capture_output=True, check=True).stdout.decode().split()[-1]
 
     LOGGER.info(f'\n{prefix} starting export with Edge TPU compiler {ver}...')
-    f = str(file).replace('.pt', '-int8_edgetpu.tflite')  # Edge TPU model
-    f_tfl = str(file).replace('.pt', '-int8.tflite')  # TFLite model
+    f = str(file).replace('.pt', '-int8_edgetpu.tflite')  # Edge TPU models
+    f_tfl = str(file).replace('.pt', '-int8.tflite')  # TFLite models
 
     cmd = f"edgetpu_compiler -s -d -k 10 --out_dir {file.parent} {f_tfl}"
     subprocess.run(cmd.split(), check=True)
@@ -434,7 +434,7 @@ def export_tfjs(file, prefix=colorstr('TensorFlow.js:')):
     LOGGER.info(f'\n{prefix} starting export with tensorflowjs {tfjs.__version__}...')
     f = str(file).replace('.pt', '_web_model')  # js dir
     f_pb = file.with_suffix('.pb')  # *.pb path
-    f_json = f'{f}/model.json'  # *.json path
+    f_json = f'{f}/models.json'  # *.json path
 
     cmd = f'tensorflowjs_converter --input_format=tf_frozen_model ' \
           f'--output_node_names=Identity,Identity_1,Identity_2,Identity_3 {f_pb} {f}'
@@ -491,7 +491,7 @@ def add_tflite_metadata(file, metadata, num_outputs):
 def run(
         data=ROOT / 'data/coco128.yaml',  # 'dataset.yaml path'
         weights=ROOT / 'yolov5s.pt',  # weights path
-        imgsz=(640, 640),  # image (height, width)
+        imgsz=(640, 640),  # images (height, width)
         batch_size=1,  # batch size
         device='cpu',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         include=('torchscript', 'onnx'),  # include formats
@@ -501,12 +501,12 @@ def run(
         optimize=False,  # TorchScript: optimize for mobile
         int8=False,  # CoreML/TF INT8 quantization
         dynamic=False,  # ONNX/TF/TensorRT: dynamic axes
-        simplify=False,  # ONNX: simplify model
+        simplify=False,  # ONNX: simplify models
         opset=12,  # ONNX: opset version
         verbose=False,  # TensorRT: verbose log
         workspace=4,  # TensorRT: workspace size (GB)
-        nms=False,  # TF: add NMS to model
-        agnostic_nms=False,  # TF: add agnostic NMS to model
+        nms=False,  # TF: add NMS to models
+        agnostic_nms=False,  # TF: add agnostic NMS to models
         topk_per_class=100,  # TF.js NMS: topk per class to keep
         topk_all=100,  # TF.js NMS: topk for all classes to keep
         iou_thres=0.45,  # TF.js NMS: IoU threshold
@@ -520,12 +520,12 @@ def run(
     jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs, paddle = flags  # export booleans
     file = Path(url2file(weights) if str(weights).startswith(('http:/', 'https:/')) else weights)  # PyTorch weights
 
-    # Load PyTorch model
+    # Load PyTorch models
     device = select_device(device)
     if half:
         assert device.type != 'cpu' or coreml, '--half only compatible with GPU export, i.e. use --device 0'
         assert not dynamic, '--half not compatible with --dynamic, i.e. use either --half or --dynamic but not both'
-    model = attempt_load(weights, device=device, inplace=True, fuse=True)  # load FP32 model
+    model = attempt_load(weights, device=device, inplace=True, fuse=True)  # load FP32 models
 
     # Checks
     imgsz *= 2 if len(imgsz) == 1 else 1  # expand
@@ -535,9 +535,9 @@ def run(
     # Input
     gs = int(max(model.stride))  # grid size (max stride)
     imgsz = [check_img_size(x, gs) for x in imgsz]  # verify img_size are gs-multiples
-    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # image size(1,3,320,192) BCHW iDetection
+    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # images size(1,3,320,192) BCHW iDetection
 
-    # Update model
+    # Update models
     model.eval()
     for k, m in model.named_modules():
         if isinstance(m, Detect):
@@ -549,8 +549,8 @@ def run(
         y = model(im)  # dry runs
     if half and not coreml:
         im, model = im.half(), model.half()  # to FP16
-    shape = tuple((y[0] if isinstance(y, tuple) else y).shape)  # model output shape
-    metadata = {'stride': int(max(model.stride)), 'names': model.names}  # model metadata
+    shape = tuple((y[0] if isinstance(y, tuple) else y).shape)  # models output shape
+    metadata = {'stride': int(max(model.stride)), 'names': model.names}  # models metadata
     LOGGER.info(f"\n{colorstr('PyTorch:')} starting from {file} with output shape {shape} ({file_size(file):.1f} MB)")
 
     # Exports
@@ -604,7 +604,7 @@ def run(
                     f"\nResults saved to {colorstr('bold', file.parent.resolve())}"
                     f"\nDetect:          python {dir / ('detect.py' if det else 'predict.py')} --weights {f[-1]} {h}"
                     f"\nValidate:        python {dir / 'val.py'} --weights {f[-1]} {h}"
-                    f"\nPyTorch Hub:     model = torch.hub.load('ultralytics/yolov5', 'custom', '{f[-1]}')  {s}"
+                    f"\nPyTorch Hub:     models = torch.hub.load('ultralytics/yolov5', 'custom', '{f[-1]}')  {s}"
                     f"\nVisualize:       https://netron.app")
     return f  # return list of exported files/dirs
 
@@ -612,8 +612,8 @@ def run(
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default=ROOT / 'data/coco128.yaml', help='dataset.yaml path')
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model.pt path(s)')
-    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640, 640], help='image (h, w)')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='models.pt path(s)')
+    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640, 640], help='images (h, w)')
     parser.add_argument('--batch-size', type=int, default=1, help='batch size')
     parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--half', action='store_true', help='FP16 half-precision export')
@@ -622,12 +622,12 @@ def parse_opt():
     parser.add_argument('--optimize', action='store_true', help='TorchScript: optimize for mobile')
     parser.add_argument('--int8', action='store_true', help='CoreML/TF INT8 quantization')
     parser.add_argument('--dynamic', action='store_true', help='ONNX/TF/TensorRT: dynamic axes')
-    parser.add_argument('--simplify', action='store_true', help='ONNX: simplify model')
+    parser.add_argument('--simplify', action='store_true', help='ONNX: simplify models')
     parser.add_argument('--opset', type=int, default=12, help='ONNX: opset version')
     parser.add_argument('--verbose', action='store_true', help='TensorRT: verbose log')
     parser.add_argument('--workspace', type=int, default=4, help='TensorRT: workspace size (GB)')
-    parser.add_argument('--nms', action='store_true', help='TF: add NMS to model')
-    parser.add_argument('--agnostic-nms', action='store_true', help='TF: add agnostic NMS to model')
+    parser.add_argument('--nms', action='store_true', help='TF: add NMS to models')
+    parser.add_argument('--agnostic-nms', action='store_true', help='TF: add agnostic NMS to models')
     parser.add_argument('--topk-per-class', type=int, default=100, help='TF.js NMS: topk per class to keep')
     parser.add_argument('--topk-all', type=int, default=100, help='TF.js NMS: topk for all classes to keep')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='TF.js NMS: IoU threshold')

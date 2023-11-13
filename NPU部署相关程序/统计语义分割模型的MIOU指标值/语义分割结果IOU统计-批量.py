@@ -9,22 +9,22 @@ import math
 def bool_image_value(image_array,threshold_value = 125):
     bool_array = copy.deepcopy(image_array)
 
-    # Í¼Ïñ¾ØÕóÔªËØÒÔ125×÷ÎªÇø·ÖµãÇø·ÖÎª0¡¢1
-    # ¸ù¾ÝÌõ¼þ²Ù×÷½øÐÐÔªËØÖØ¶¨Òå
+    # å›¾åƒçŸ©é˜µå…ƒç´ ä»¥125ä½œä¸ºåŒºåˆ†ç‚¹åŒºåˆ†ä¸º0ã€1
+    # æ ¹æ®æ¡ä»¶æ“ä½œè¿›è¡Œå…ƒç´ é‡å®šä¹‰
     bool_array[image_array > threshold_value] = True
     bool_array[image_array <= threshold_value] = False
 
     # print(np.sum(bool_array))
-    # # Ê¹ÓÃnp.uniqueº¯ÊýÍ³¼ÆÔªËØÆµÂÊ
+    # # ä½¿ç”¨np.uniqueå‡½æ•°ç»Ÿè®¡å…ƒç´ é¢‘çŽ‡
     # unique_elements, counts = np.unique(bool_array, return_counts=True)
-    # # ´òÓ¡Ã¿¸öÔªËØ¼°ÆäÆµÂÊ
+    # # æ‰“å°æ¯ä¸ªå…ƒç´ åŠå…¶é¢‘çŽ‡
     # for element, count in zip(unique_elements, counts):
-    #     print(f"ÏñËØÖµ {element} µÄÆµÂÊÎª {count}")
+    #     print(f"åƒç´ å€¼ {element} çš„é¢‘çŽ‡ä¸º {count}")
     # pass
     return bool_array
 
 def get_single_iou_value(bool_array_left,bool_array_right):
-    # ¼ÆËãÁ½¸ö¾ØÕóÖÐÔªËØÎª1ÇÒÏàÍ¬Î»ÖÃµÄ¸öÊý
+    # è®¡ç®—ä¸¤ä¸ªçŸ©é˜µä¸­å…ƒç´ ä¸º1ä¸”ç›¸åŒä½ç½®çš„ä¸ªæ•°
     count_and = np.sum(bool_array_left & bool_array_right)
     count_or = np.sum(bool_array_left | bool_array_right)
 
@@ -32,8 +32,8 @@ def get_single_iou_value(bool_array_left,bool_array_right):
     return single_iou
 
 def read_predict_image(image_path):
-    image = Image.open(image_path)  # ½« 'image.jpg' Ìæ»»ÎªÄúÒª´ò¿ªµÄÍ¼ÏñÎÄ¼þÂ·¾¶
-    # ½«Í¼Ïñ×ª»»ÎªNumPyÊý×é
+    image = Image.open(image_path)  # å°† 'images.jpg' æ›¿æ¢ä¸ºæ‚¨è¦æ‰“å¼€çš„å›¾åƒæ–‡ä»¶è·¯å¾„
+    # å°†å›¾åƒè½¬æ¢ä¸ºNumPyæ•°ç»„
     image_array = np.array(image)
     return image_array
 

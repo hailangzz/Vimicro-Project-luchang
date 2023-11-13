@@ -55,7 +55,7 @@ def time_synchronized():
 
 
 def is_parallel(model):
-    # is model is parallel with DP or DDP
+    # is models is parallel with DP or DDP
     return type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)
 
 
@@ -77,7 +77,7 @@ def find_modules(model, mclass=nn.Conv2d):
 
 
 def sparsity(model):
-    # Return global model sparsity
+    # Return global models sparsity
     a, b = 0., 0.
     for p in model.parameters():
         a += p.numel()
@@ -86,9 +86,9 @@ def sparsity(model):
 
 
 def prune(model, amount=0.3):
-    # Prune model to requested global sparsity
+    # Prune models to requested global sparsity
     import torch.nn.utils.prune as prune
-    print('Pruning model... ', end='')
+    print('Pruning models... ', end='')
     for name, m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             prune.l1_unstructured(m, name='weight', amount=amount)  # prune
@@ -121,7 +121,7 @@ def fuse_conv_and_bn(conv, bn):
 
 
 def model_info(model, verbose=False):
-    # Plots a line-by-line description of a PyTorch model
+    # Plots a line-by-line description of a PyTorch models
     n_p = sum(x.numel() for x in model.parameters())  # number parameters
     n_g = sum(x.numel() for x in model.parameters() if x.requires_grad)  # number gradients
     if verbose:
@@ -142,10 +142,10 @@ def model_info(model, verbose=False):
 
 
 def load_classifier(name='resnet101', n=2):
-    # Loads a pretrained model reshaped to n-class rec_result
+    # Loads a pretrained models reshaped to n-class rec_result
     model = models.__dict__[name](pretrained=True)
 
-    # Display model properties
+    # Display models properties
     input_size = [3, 224, 224]
     input_space = 'RGB'
     input_range = [0, 1]
@@ -175,7 +175,7 @@ def scale_img(img, ratio=1.0, same_shape=False):  # img(16,3,256,416), r=ratio
 
 class ModelEMA:
     """ Model Exponential Moving Average from https://github.com/rwightman/pytorch-image-models
-    Keep a moving average of everything in the model state_dict (parameters and buffers).
+    Keep a moving average of everything in the models state_dict (parameters and buffers).
     This is intended to allow functionality like
     https://www.tensorflow.org/api_docs/python/tf/train/ExponentialMovingAverage
     A smoothed version of the weights is necessary for some training schemes to perform well.
@@ -186,7 +186,7 @@ class ModelEMA:
     To keep EMA from using GPU resources, set device='cpu'. This will save a bit of memory but
     disable validation of the EMA weights. Validation will have to be done manually in a separate
     process, or after the training stops converging.
-    This class is sensitive where it is initialized in the sequence of model init,
+    This class is sensitive where it is initialized in the sequence of models init,
     GPU assignment and distributed training wrappers.
     I've tested with the sequence in my own train_yolov5.py for torch.DataParallel, apex.DDP, and single-GPU.
     """
@@ -197,7 +197,7 @@ class ModelEMA:
         self.ema.eval()
         self.updates = 0  # number of EMA updates
         self.decay = lambda x: decay * (1 - math.exp(-x / 2000))  # decay exponential ramp (to help early epochs)
-        self.device = device  # perform ema on different device from model if set
+        self.device = device  # perform ema on different device from models if set
         if device:
             self.ema.to(device)
         for p in self.ema.parameters():
@@ -209,7 +209,7 @@ class ModelEMA:
             self.updates += 1
             d = self.decay(self.updates)
 
-            msd = model.module.state_dict() if is_parallel(model) else model.state_dict()  # model state_dict
+            msd = model.module.state_dict() if is_parallel(model) else model.state_dict()  # models state_dict
             for k, v in self.ema.state_dict().items():
                 if v.dtype.is_floating_point:
                     v *= d

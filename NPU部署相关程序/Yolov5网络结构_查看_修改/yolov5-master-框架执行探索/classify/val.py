@@ -1,6 +1,6 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
-Validate a trained YOLOv5 classification model on a classification dataset
+Validate a trained YOLOv5 classification models on a classification dataset
 
 Usage:
     $ bash data/scripts/get_imagenet.sh --val  # download ImageNet val split (6.3G, 50000 images)
@@ -43,7 +43,7 @@ from utils.torch_utils import select_device, smart_inference_mode
 @smart_inference_mode()
 def run(
     data=ROOT / '../datasets/mnist',  # dataset dir
-    weights=ROOT / 'yolov5s-cls.pt',  # model.pt path(s)
+    weights=ROOT / 'yolov5s-cls.pt',  # models.pt path(s)
     batch_size=128,  # batch size
     imgsz=224,  # inference size (pixels)
     device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -59,10 +59,10 @@ def run(
     criterion=None,
     pbar=None,
 ):
-    # Initialize/load model and set device
+    # Initialize/load models and set device
     training = model is not None
     if training:  # called by train.py
-        device, pt, jit, engine = next(model.parameters()).device, True, False, False  # get model device, PyTorch model
+        device, pt, jit, engine = next(model.parameters()).device, True, False, False  # get models device, PyTorch models
         half &= device.type != 'cpu'  # half precision only supported on CUDA
         model.half() if half else model.float()
     else:  # called directly
@@ -72,10 +72,10 @@ def run(
         save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
         save_dir.mkdir(parents=True, exist_ok=True)  # make dir
 
-        # Load model
+        # Load models
         model = DetectMultiBackend(weights, device=device, dnn=dnn, fp16=half)
         stride, pt, jit, engine = model.stride, model.pt, model.jit, model.engine
-        imgsz = check_img_size(imgsz, s=stride)  # check image size
+        imgsz = check_img_size(imgsz, s=stride)  # check images size
         half = model.fp16  # FP16 supported on limited backends with CUDA
         if engine:
             batch_size = model.batch_size
@@ -132,7 +132,7 @@ def run(
             LOGGER.info(f"{c:>24}{aci.shape[0]:>12}{top1i:>12.3g}{top5i:>12.3g}")
 
         # Print results
-        t = tuple(x.t / len(dataloader.dataset.samples) * 1E3 for x in dt)  # speeds per image
+        t = tuple(x.t / len(dataloader.dataset.samples) * 1E3 for x in dt)  # speeds per images
         shape = (1, 3, imgsz, imgsz)
         LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms post-process per image at shape {shape}' % t)
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}")
@@ -143,7 +143,7 @@ def run(
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default=ROOT / '../datasets/mnist', help='dataset path')
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s-cls.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s-cls.pt', help='models.pt path(s)')
     parser.add_argument('--batch-size', type=int, default=128, help='batch size')
     parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=224, help='inference size (pixels)')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')

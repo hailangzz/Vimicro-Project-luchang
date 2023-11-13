@@ -126,14 +126,14 @@ class Ensemble(nn.ModuleList):
 
 
 def attempt_load(weights, map_location=None):
-    # Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a
+    # Loads an ensemble of models weights=[a,b,c] or a single models weights=[a] or weights=a
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
         google_utils.attempt_download(w)
-        model.append(torch.load(w, map_location=map_location)['model'].float().fuse().eval())  # load FP32 model
+        model.append(torch.load(w, map_location=map_location)['models'].float().fuse().eval())  # load FP32 models
 
     if len(model) == 1:
-        return model[-1]  # return model
+        return model[-1]  # return models
     else:
         print('Ensemble created with %s\n' % weights)
         for k in ['names', 'stride']:

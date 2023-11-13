@@ -5,27 +5,27 @@ import os
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-m", "--model", default=r'C:\Users\34426\.cache\torch\hub\checkpoints\vgg19-dcbb9e9d.pth',required=True,
-    help="Path to the deep ranking model")
+ap.add_argument("-m", "--models", default=r'C:\Users\34426\.cache\torch\hub\checkpoints\vgg19-dcbb9e9d.pth',required=True,
+    help="Path to the deep ranking models")
 
 ap.add_argument("-i1", "--image1", required=True,
-    help="Path to the first image")
+    help="Path to the first images")
 
 ap.add_argument("-i2", "--image2", required=True,
-    help="Path to the second image")
+    help="Path to the second images")
 
 args = vars(ap.parse_args())
 
-if not os.path.exists(args['model']):
-    print("The model path doesn't exist!")
+if not os.path.exists(args['models']):
+    print("The models path doesn't exist!")
     exit()
 
 if not os.path.exists(args['image1']):
-    print("The image 1 path doesn't exist!")
+    print("The images 1 path doesn't exist!")
     exit()
 
 if not os.path.exists(args['image2']):
-    print("The image 2 path doesn't exist!")
+    print("The images 2 path doesn't exist!")
     exit()
 
 args = vars(ap.parse_args())
@@ -81,10 +81,10 @@ def deep_rank_model():
 
 model = deep_rank_model()
 
-# for layer in model.layers:
+# for layer in models.layers:
 #     print (layer.name, layer.output_shape)
 
-model.load_weights(args['model'])
+model.load_weights(args['models'])
 
 image1 = load_img(args['image1'])
 image1 = img_to_array(image1).astype("float64")

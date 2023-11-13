@@ -1,7 +1,7 @@
 """
     ClassySORT
     
-    YOLO v5(image segmentation) + vanilla SORT(multi-object tracker) implementation 
+    YOLO v5(images segmentation) + vanilla SORT(multi-object tracker) implementation
     that is aware of the tracked object category.
     
     This is for people who want a real-time multiple object tracker (MOT) 
@@ -163,7 +163,7 @@ class YOLOV5_ONNX(object):
 
     def letterbox(self, img, new_shape=(640, 640), color=(114, 114, 114), auto=False, scaleFill=False, scaleup=True,
                   stride=32):
-        # Resize and pad image while meeting stride-multiple constraints
+        # Resize and pad images while meeting stride-multiple constraints
         shape = img.shape[:2]  # current shape [height, width]
         if isinstance(new_shape, int):
             new_shape = (new_shape, new_shape)
@@ -214,9 +214,9 @@ class YOLOV5_ONNX(object):
             prediction = prediction.float()  # to FP32
         xc = prediction[..., 4] > conf_thres  # candidates
         min_wh, max_wh = 2, 4096  # (pixels) minimum and maximum box width and height
-        max_det = 300  # maximum number of detections per image
+        max_det = 300  # maximum number of detections per images
         output = [None] * prediction.shape[0]
-        for xi, x in enumerate(prediction):  # image index, image inference
+        for xi, x in enumerate(prediction):  # images index, images inference
             x = x[xc[xi]]  # confidence
             if not x.shape[0]:
                 continue
@@ -240,7 +240,7 @@ class YOLOV5_ONNX(object):
 
     def clip_coords(self, boxes, img_shape):
         '''check if it is out of bounds'''
-        # Clip bounding xyxy bounding boxes to image shape (height, width)
+        # Clip bounding xyxy bounding boxes to images shape (height, width)
         boxes[:, 0].clamp_(0, img_shape[1])  # x1
         boxes[:, 1].clamp_(0, img_shape[0])  # y1
         boxes[:, 2].clamp_(0, img_shape[1])  # x2
@@ -270,7 +270,7 @@ class YOLOV5_ONNX(object):
         return 1 / (1 + np.exp(-x))
 
     def infer(self, img_path, save_path):
-        '''model forward inference'''
+        '''models forward inference'''
         anchors = len(anchor_list[0]) // 2
         anchor = np.array(anchor_list).astype(np.float32).reshape(3, -1, 2)
 
@@ -279,11 +279,11 @@ class YOLOV5_ONNX(object):
         size = [int(area / stride[0] ** 2), int(area / stride[1] ** 2), int(area / stride[2] ** 2)]
         feature = [[int(j / stride[i]) for j in img_size] for i in range(3)]
 
-        # read image
+        # read images
         src_img = cv2.imread(img_path)
         src_size = src_img.shape[:2]
 
-        # Resize and pad image while meeting stride-multiple constraints
+        # Resize and pad images while meeting stride-multiple constraints
         img = self.letterbox(src_img, img_size, stride=32)[0]
         vehicle_img_copy = copy.copy(img)
 
@@ -336,9 +336,9 @@ class YOLOV5_ONNX(object):
         cast = time.time() - start
         print("cast time:{}".format(cast))
 
-        # mapping original image
+        # mapping original images
         img_shape = img.shape[2:]
-        for det in results:  # detections per image
+        for det in results:  # detections per images
             if det is not None and len(det):
                 det[:, :4] = det[:, :4]
                 # det[:, :4] = self.scale_coords(img_shape, det[:, :4], src_size).round()
@@ -350,7 +350,7 @@ class YOLOV5_ONNX(object):
         plate_name=''
         if det is not None:
             for *xyxy, conf, cls in reversed(det):
-                # Add bbox to image
+                # Add bbox to images
                 c = int(cls)  # integer class
                 # label = f'{names[c]} {conf:.2f}'
                 if c == 1:
@@ -415,8 +415,8 @@ if __name__ == '__main__':
     nohup python track_strategy_plate_detection_recognition.py --source ./test_videos_1/fact_20181019141901_20181019142439.avi >> logging_10.9.2.txt 2>&1 &
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--windows-plate-marker-person-weight', type=str, default=r'D:\迅雷下载\AI数据集汇总\人车非数据及项目\模型代码及数据\模型代码及数据\plate_detection_recognition\weights\\renchefeis2.onnx', help='model weight')
-    parser.add_argument('--plate-rec-weight', type=str, default=r'D:\迅雷下载\AI数据集汇总\人车非数据及项目\模型代码及数据\模型代码及数据\plate_detection_recognition\weights\\plate_rec.onnx', help='model weight')
+    parser.add_argument('--windows-plate-marker-person-weight', type=str, default=r'D:\迅雷下载\AI数据集汇总\人车非数据及项目\模型代码及数据\模型代码及数据\plate_detection_recognition\weights\\renchefeis2.onnx', help='models weight')
+    parser.add_argument('--plate-rec-weight', type=str, default=r'D:\迅雷下载\AI数据集汇总\人车非数据及项目\模型代码及数据\模型代码及数据\plate_detection_recognition\weights\\plate_rec.onnx', help='models weight')
     parser.add_argument('--source', type=str,
                         default='./test_imgs', help='source')
     parser.add_argument('--output', type=str, default='./test_result',
@@ -434,9 +434,9 @@ if __name__ == '__main__':
 
     parser.add_argument('--names', nargs='+', type=str, default=['windows', 'plate', 'marker', 'person'],
                         help='class name')
-    parser.add_argument('--vehicle-img-size', nargs='+', type=int, default=(320, 320), help='image size')
+    parser.add_argument('--vehicle-img-size', nargs='+', type=int, default=(320, 320), help='images size')
     parser.add_argument('--class-num', type=int, default=4, help='class number')
-    parser.add_argument('--stride', nargs='+', type=int, default=[8, 16, 32], help='model stride')
+    parser.add_argument('--stride', nargs='+', type=int, default=[8, 16, 32], help='models stride')
     parser.add_argument('--anchor-list', nargs='+', type=int,
                         default=[[12, 8, 65, 23, 74, 26], [67, 58, 84, 66, 215, 66], [216, 95, 258, 91, 241, 109]],
                         help='anchor list')

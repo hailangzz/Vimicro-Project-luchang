@@ -110,7 +110,7 @@ class WandbLogger():
     """Log training runs, datasets, models, and predictions to Weights & Biases.
 
     This logger sends information to W&B at wandb.ai. By default, this information
-    includes hyperparameters, system configuration and metrics, model metrics,
+    includes hyperparameters, system configuration and metrics, models metrics,
     and basic data metrics and analyses.
 
     By providing additional command line arguments to train.py, datasets,
@@ -220,7 +220,7 @@ class WandbLogger():
     def setup_training(self, opt):
         """
         Setup the necessary processes for training YOLO models:
-          - Attempt to download model checkpoint and dataset artifacts if opt.resume stats with WANDB_ARTIFACT_PREFIX
+          - Attempt to download models checkpoint and dataset artifacts if opt.resume stats with WANDB_ARTIFACT_PREFIX
           - Update data_dict, to contain info of previous run if resumed and the paths of dataset artifact if downloaded
           - Setup log_dict, initialize bbox_interval
 
@@ -271,7 +271,7 @@ class WandbLogger():
 
     def download_dataset_artifact(self, path, alias):
         """
-        download the model checkpoint artifact if the path starts with WANDB_ARTIFACT_PREFIX
+        download the models checkpoint artifact if the path starts with WANDB_ARTIFACT_PREFIX
 
         arguments:
         path -- path of the dataset to be used for training
@@ -291,14 +291,14 @@ class WandbLogger():
 
     def download_model_artifact(self, opt):
         """
-        download the model checkpoint artifact if the resume path starts with WANDB_ARTIFACT_PREFIX
+        download the models checkpoint artifact if the resume path starts with WANDB_ARTIFACT_PREFIX
 
         arguments:
         opt (namespace) -- Commandline arguments for this run
         """
         if opt.resume.startswith(WANDB_ARTIFACT_PREFIX):
             model_artifact = wandb.use_artifact(remove_prefix(opt.resume, WANDB_ARTIFACT_PREFIX) + ":latest")
-            assert model_artifact is not None, 'Error: W&B model artifact doesn\'t exist'
+            assert model_artifact is not None, 'Error: W&B models artifact doesn\'t exist'
             modeldir = model_artifact.download()
             # epochs_trained = model_artifact.metadata.get('epochs_trained')
             total_epochs = model_artifact.metadata.get('total_epochs')
@@ -309,7 +309,7 @@ class WandbLogger():
 
     def log_model(self, path, opt, epoch, fitness_score, best_model=False):
         """
-        Log the model checkpoint as W&B artifact
+        Log the models checkpoint as W&B artifact
 
         arguments:
         path (Path)   -- Path of directory containing the checkpoints
@@ -319,7 +319,7 @@ class WandbLogger():
         best_model (boolean) -- Boolean representing if the current checkpoint is the best yet.
         """
         model_artifact = wandb.Artifact('run_' + wandb.run.id + '_model',
-                                        type='model',
+                                        type='models',
                                         metadata={
                                             'original_url': str(path),
                                             'epochs_trained': epoch + 1,
@@ -330,7 +330,7 @@ class WandbLogger():
         model_artifact.add_file(str(path / 'last.pt'), name='last.pt')
         wandb.log_artifact(model_artifact,
                            aliases=['latest', 'last', 'epoch ' + str(self.current_epoch), 'best' if best_model else ''])
-        LOGGER.info(f"Saving model artifact on epoch {epoch + 1}")
+        LOGGER.info(f"Saving models artifact on epoch {epoch + 1}")
 
     def log_dataset_artifact(self, data_file, single_cls, project, overwrite_config=False):
         """
@@ -452,7 +452,7 @@ class WandbLogger():
 
         arguments:
         predn (list): list of predictions in the native space in the format - [xmin, ymin, xmax, ymax, confidence, class]
-        path (str): local path of the current evaluation image
+        path (str): local path of the current evaluation images
         names (dict(int, str)): hash map that maps class ids to labels
         """
         class_set = wandb.Classes([{'id': id, 'name': name} for id, name in names.items()])
@@ -491,12 +491,12 @@ class WandbLogger():
 
     def val_one_image(self, pred, predn, path, names, im):
         """
-        Log validation data for one image. updates the result Table if validation dataset is uploaded and log bbox media panel
+        Log validation data for one images. updates the result Table if validation dataset is uploaded and log bbox media panel
 
         arguments:
         pred (list): list of scaled predictions in the format - [xmin, ymin, xmax, ymax, confidence, class]
         predn (list): list of predictions in the native space - [xmin, ymin, xmax, ymax, confidence, class]
-        path (str): local path of the current evaluation image
+        path (str): local path of the current evaluation images
         """
         if self.val_table and self.result_table:  # Log Table if Val dataset is uploaded as artifact
             self.log_training_progress(predn, path, names)
@@ -530,7 +530,7 @@ class WandbLogger():
 
     def end_epoch(self, best_result=False):
         """
-        commit the log_dict, model artifacts and Tables to W&B and flush the log_dict.
+        commit the log_dict, models artifacts and Tables to W&B and flush the log_dict.
 
         arguments:
         best_result (boolean): Boolean representing if the result of this evaluation is best or not

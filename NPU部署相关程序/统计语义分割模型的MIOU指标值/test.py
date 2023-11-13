@@ -19,7 +19,7 @@ def get_single_iou_value(bool_array_left,bool_array_right):
     return single_iou
 
 def read_predict_image(image_path):
-    image = Image.open(image_path)  # 将 'image.jpg' 替换为您要打开的图像文件路径
+    image = Image.open(image_path)  # 将 'images.jpg' 替换为您要打开的图像文件路径
     # 将图像转换为NumPy数组
     image_array = np.array(image)
 

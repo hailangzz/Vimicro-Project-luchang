@@ -89,10 +89,10 @@ def get_pruned_yaml(cfg, nc):
             name_list.append(i)
         return name_list
 
-    # save pruned model config yaml
+    # save pruned models config yaml
     pruned_yaml = {}
     with open(cfg, encoding='ascii', errors='ignore') as f:
-        origin_yaml = yaml.safe_load(f)  # model dict
+        origin_yaml = yaml.safe_load(f)  # models dict
 
     pruned_yaml["nc"] = nc
     pruned_yaml["depth_multiple"] = origin_yaml["depth_multiple"]
@@ -119,7 +119,7 @@ def get_mask_bn(model, ignore_bn_list, thre_prune):
             bn_module.bias.data.mul_(mask)
             print(f"|\t{bnname:<25}{'|':<10}{bn_module.weight.data.size()[0]:<20}{'|':<10}{int(mask.sum()):<20}|")
             assert int(mask.sum(
-            )) > 0, "Current remaining channel must greater than 0!!! please set prune percent to lower thesh, or you can retrain a more sparse model..."
+            )) > 0, "Current remaining channel must greater than 0!!! please set prune percent to lower thesh, or you can retrain a more sparse models..."
     print("=" * 94)
     return model, mask_bn
 
@@ -133,7 +133,7 @@ def prune_model_load_weight(model, pruned_model, mask_bn):
     changed_state = []
     for ((layername, layer), (pruned_layername, pruned_layer)) in zip(model.named_modules(), pruned_model.named_modules()):
         assert layername == pruned_layername
-        if isinstance(layer, nn.Conv2d) and not layername.startswith("model.24"):
+        if isinstance(layer, nn.Conv2d) and not layername.startswith("models.24"):
             convname = layername[:-4] + "bn"
             if convname in from_to_map.keys():
                 former = from_to_map[convname]
@@ -187,7 +187,7 @@ def prune_model_load_weight(model, pruned_model, mask_bn):
             changed_state.append(layername + ".running_var")
             changed_state.append(layername + ".num_batches_tracked")
 
-        if isinstance(layer, nn.Conv2d) and layername.startswith("model.24"):
+        if isinstance(layer, nn.Conv2d) and layername.startswith("models.24"):
             former = from_to_map[layername]
             in_idx = np.squeeze(np.argwhere(
                 np.asarray(mask_bn[former].cpu().numpy())))

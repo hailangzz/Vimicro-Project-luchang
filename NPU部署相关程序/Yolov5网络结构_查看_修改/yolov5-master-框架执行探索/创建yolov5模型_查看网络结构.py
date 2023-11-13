@@ -17,12 +17,12 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', type=str, default=ROOT / 'E:\Downloads\yolov5s.pt', help='initial weights path')
-    parser.add_argument('--cfg', type=str, default='./models/yolov5s.yaml', help='model.yaml path')
+    parser.add_argument('--cfg', type=str, default='./models/yolov5s.yaml', help='models.yaml path')
     parser.add_argument('--data', type=str, default=ROOT / './data/my_test.yaml', help='dataset.yaml path')
     parser.add_argument('--hyp', type=str, default=ROOT / 'data/hyps/hyp.scratch-low.yaml', help='hyperparameters path') #模型超参数信息
     parser.add_argument('--epochs', type=int, default=1, help='total training epochs')
     parser.add_argument('--batch-size', type=int, default=2, help='total batch size for all GPUs, -1 for autobatch')
-    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='train, val image size (pixels)')
+    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='train, val images size (pixels)')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--resume', nargs='?', const=True, default=False, help='resume most recent training')
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
@@ -31,8 +31,8 @@ def parse_opt(known=False):
     parser.add_argument('--noplots', action='store_true', help='save no plot files')
     parser.add_argument('--evolve', type=int, nargs='?', const=300, help='evolve hyperparameters for x generations')
     parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')
-    parser.add_argument('--cache', type=str, nargs='?', const='ram', help='image --cache ram/disk')
-    parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
+    parser.add_argument('--cache', type=str, nargs='?', const='ram', help='images --cache ram/disk')
+    parser.add_argument('--images-weights', action='store_true', help='use weighted images selection for training')
     parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
     parser.add_argument('--single-cls', action='store_true', help='train multi-class data as single-class')
@@ -56,7 +56,7 @@ def parse_opt(known=False):
     # Logger arguments
     parser.add_argument('--entity', default=None, help='Entity')
     parser.add_argument('--upload_dataset', nargs='?', const=True, default=False, help='Upload data, "val" option')
-    parser.add_argument('--bbox_interval', type=int, default=-1, help='Set bounding-box image logging interval')
+    parser.add_argument('--bbox_interval', type=int, default=-1, help='Set bounding-box images logging interval')
     parser.add_argument('--artifact_alias', type=str, default='latest', help='Version of dataset artifact to use')
 
     return parser.parse_known_args()[0] if known else parser.parse_args()
@@ -104,7 +104,7 @@ batch_norm_list = []
 for k, m in model.named_modules():
     if isinstance(m, Bottleneck):
         print(m.add)
-        print(k, "\t--> model info\t-->", m)
+        print(k, "\t--> models info\t-->", m)
         if m.add:
             origin_bn_list.append(k)
 

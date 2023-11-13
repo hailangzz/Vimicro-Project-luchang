@@ -68,7 +68,7 @@ def create_rec_image_dataset(rec_type,image_path):
         img_path = os.path.join(image_path, filename)
         img = cv2.imdecode(np.fromfile(img_path, dtype=np.uint8), -1)
         # img = cv2.imread(img_path)
-        assert os.path.exists(img_path), "image file {} dose not exist.".format(img_path)
+        assert os.path.exists(img_path), "images file {} dose not exist.".format(img_path)
 
         # box = box.split('_')  # 车牌边界
         # box = [list(map(int, i.split('&'))) for i in box]

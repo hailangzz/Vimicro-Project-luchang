@@ -61,7 +61,7 @@ def plot_one_box(x, im, color=(128, 128, 128), label=None, line_thickness=3):
     :params line_thickness: bounding box的线宽
     """
     # check im内存是否连续
-    assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to plot_on_box() input image.'
+    assert im.data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to plot_on_box() input images.'
     # tl = 框框的线宽  要么等于line_thickness要么根据原图im长宽信息自适应生成一个
     tl = line_thickness or round(0.002 * (im.shape[0] + im.shape[1]) / 2) + 1  # line/font thickness
     # c1 = (x1, y1) = 矩形框的左上角   c2 = (x2, y2) = 矩形框的右下角
@@ -148,7 +148,7 @@ def output_to_target(output):
     """用在test.py中进行绘制前3个batch的预测框predictions 因为只有predictions需要修改格式 target是不需要修改格式的
     将经过nms后的output [num_obj，x1y1x2y2+conf+cls] -> [num_obj, batch_id+class+x+y+w+h+conf] 转变格式
     以便在plot_images中进行绘图 + 显示label
-    Convert model rec_result to target format [batch_id, class_id, x, y, w, h, conf]
+    Convert models rec_result to target format [batch_id, class_id, x, y, w, h, conf]
     :params rec_result: list{tensor(8)}分别对应着当前batch的8(batch_size)张图片做完nms后的结果
                     list中每个tensor[n, 6]  n表示当前图片检测到的目标个数  6=x1y1x2y2+conf+cls
     :return np.array(targets): [num_targets, batch_id+class+xywh+conf]  其中num_targets为当前batch中所有检测到目标框的个数
@@ -161,7 +161,7 @@ def output_to_target(output):
 def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max_size=640, max_subplots=16):
     """用在test.py中进行绘制前3个batch的ground truth和预测框predictions(两个图) 一起保存
     将整个batch的labels都画在这个batch的images上
-    Plot image grid with labels
+    Plot images grid with labels
     :params images: 当前batch的所有图片  Tensor [batch_size, 3, h, w]  且图片都是归一化后的
     :params targets:  直接来自target: Tensor[num_target, img_index+class+xywh]  [num_target, 6]
                       来自output_to_target: Tensor[num_pred, batch_id+class+xywh+conf] [num_pred, 7]
@@ -240,7 +240,7 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
                     boxes[[1, 3]] *= h
                 elif scale_factor < 1:
                     # 如果scale_factor < 1 说明resize过, 那么boxes也要相应变化
-                    # absolute coords need scale if image scales
+                    # absolute coords need scale if images scales
                     boxes *= scale_factor
             # 上面得到的boxes信息是相对img这张图片的标签信息 因为我们最终是要将img贴到mosaic上 所以还要变换label->mosaic
             boxes[[0, 2]] += block_x
@@ -277,7 +277,7 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
     # 最后一步 check是否需要将mosaic图片保存起来
     if fname:   # 文件名不为空的话 fname = runs\train\exp8\train_batch2.jpg
         # 限制mosaic图片尺寸
-        r = min(1280. / max(h, w) / ns, 1.0)  # ratio to limit image size
+        r = min(1280. / max(h, w) / ns, 1.0)  # ratio to limit images size
         mosaic = cv2.resize(mosaic, (int(ns * w * r), int(ns * h * r)), interpolation=cv2.INTER_AREA)
         # cv2.imwrite(fname, cv2.cvtColor(mosaic, cv2.COLOR_BGR2RGB))  # cv2 save  最好BGR -> RGB再保存
         Image.fromarray(mosaic).save(fname)  # PIL save  必须要numpy array -> tensor格式 才能保存
@@ -566,7 +566,7 @@ def feature_visualization(x, module_type, stage, n=64):
     可视化feature map(模型任意层都可以用)
     :params x: Features map   [bs, channels, height, width]
     :params module_type: Module type
-    :params stage: Module stage within model
+    :params stage: Module stage within models
     :params n: Maximum number of feature maps to plot
     """
     batch, channels, height, width = x.shape  # batch, channels, height, width
@@ -627,7 +627,7 @@ def plot_study_txt(path='', x=None):
 
 def profile_idetection(start=0, stop=0, labels=(), save_dir=''):
     """没用到
-    Plot iDetection '*.txt' per-image logs
+    Plot iDetection '*.txt' per-images logs
     """
     ax = plt.subplots(2, 4, figsize=(12, 6), tight_layout=True)[1].ravel()
     s = ['Images', 'Free Storage (GB)', 'RAM Usage (GB)', 'Battery', 'dt_raw (ms)', 'dt_smooth (ms)', 'real-world FPS']

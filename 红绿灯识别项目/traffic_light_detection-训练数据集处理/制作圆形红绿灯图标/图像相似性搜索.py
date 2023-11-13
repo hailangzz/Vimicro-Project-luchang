@@ -19,12 +19,12 @@ class Image_Similar_Class():
         self.model = 'load_model'
 
     def load_model(self,model_name, include_top=True):
-        """ Load pre-trained Keras model
+        """ Load pre-trained Keras models
         Args:
-            model_name: String, name of model to load
-            include_top: String, the model is buildt with 'feature learning block' + 'classification block'
+            model_name: String, name of models to load
+            include_top: String, the models is buildt with 'feature learning block' + 'classification block'
         Returns:
-            model: Keras model instance
+            models: Keras models instance
         """
         if self.model_name in self.available_models:
             # Load a Keras instance
@@ -33,11 +33,11 @@ class Image_Similar_Class():
                     model = VGG16(weights='imagenet', include_top=include_top)
                 elif model_name == 'resnet50':
                     model = ResNet50(weights='imagenet', include_top=include_top)
-                print(f">> '{model.name}' model successfully loaded!")
+                print(f">> '{model.name}' models successfully loaded!")
             except:
-                print(f">> Error while loading model '{self.selected_model}'")
+                print(f">> Error while loading models '{self.selected_model}'")
 
-        # Wrong selected model
+        # Wrong selected models
         else:
             print(f">> Error: there is no '{self.selected_model}' in {self.available_models}")
 
@@ -45,11 +45,11 @@ class Image_Similar_Class():
         return model
 
     def get_img_size_model(self): #设置模型对应的，图像矩阵输入尺寸···
-        """Returns image size for image processing to be used in the model
+        """Returns images size for images processing to be used in the models
         Args:
-            model: Keras model instance
+            models: Keras models instance
         Returns:
-            img_size_model: Tuple of integers, image size
+            img_size_model: Tuple of integers, images size
         """
         model_name = self.model.name
         if model_name == "vgg16":
@@ -58,14 +58,14 @@ class Image_Similar_Class():
             img_size_model = (224, 224)
         else:
             img_size_model = (224, 224)
-            print("Warning: model name unknown. Default image size: {}".format(img_size_model))
+            print("Warning: models name unknown. Default images size: {}".format(img_size_model))
 
         return img_size_model
 
     def get_layername_feature_extraction(self): #设置神经网络模型对应的特征输出层
         """ Return the name of last layer for feature extraction
         Args:
-            model: Keras model instance
+            models: Keras models instance
         Returns:
             layername_feature_extraction: String, name of the layer for feature extraction
         """
@@ -76,22 +76,22 @@ class Image_Similar_Class():
             layername_feature_extraction = 'predictions'
         else:
             layername_feature_extraction = ''
-            print("Warning: model name unknown. Default layername: '{}'".format(layername_feature_extraction))
+            print("Warning: models name unknown. Default layername: '{}'".format(layername_feature_extraction))
 
         return layername_feature_extraction
 
     # 图像矩阵输入预处理
     def image_processing(self,img_array):
-        """ Preprocess image to be used in a keras model instance
+        """ Preprocess images to be used in a keras models instance
         Args:
-            img_array: Numpy array of an image which will be predicte
+            img_array: Numpy array of an images which will be predicte
         Returns:
-            processed_img = Numpy array which represents the processed image
+            processed_img = Numpy array which represents the processed images
         """
         # Expand the shape
         img = np.expand_dims(img_array, axis=0)
 
-        # Convert image from RGB to BGR (each color channel is zero-centered with respect to the ImageNet dataset, without scaling)
+        # Convert images from RGB to BGR (each color channel is zero-centered with respect to the ImageNet dataset, without scaling)
         processed_img = preprocess_input(img)
 
         return processed_img
@@ -99,15 +99,15 @@ class Image_Similar_Class():
     def get_feature_vector(self,img_path): #计算图像在指定模型下的特征输出矩阵值
 
         try:
-            """ Get a feature vector extraction from an image by using a keras model instance
+            """ Get a feature vector extraction from an images by using a keras models instance
             Args:
-                model: Keras model instance used to do the classification.
-                img_path: String to the image path which will be predicted
+                models: Keras models instance used to do the classification.
+                img_path: String to the images path which will be predicted
             Returns:
-                feature_vect: List of visual feature from the input image
+                feature_vect: List of visual feature from the input images
             """
 
-            # Creation of a new keras model instance without the last layer
+            # Creation of a new keras models instance without the last layer
             layername_feature_extraction = self.get_layername_feature_extraction()  # 获取模型特征提取层的名称：
             model_feature_vect = Model(inputs=self.model.input,
                                        outputs=self.model.get_layer(layername_feature_extraction).output)  # 计算输入下的模型提取层的特征向量结果
@@ -130,8 +130,8 @@ class Image_Similar_Class():
     def calculate_similarity(self,image_path_a, image_path_b):
         """Compute similarities between two images using 'cosine similarities'
         Args:
-            vector1: Numpy vector to represent feature extracted vector from image 1
-            vector2: Numpy vector to represent feature extracted vector from image 1
+            vector1: Numpy vector to represent feature extracted vector from images 1
+            vector2: Numpy vector to represent feature extracted vector from images 1
         Returns:
             sim_cos: Float to describe the similarity between both images
         """

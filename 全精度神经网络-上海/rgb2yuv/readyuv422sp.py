@@ -44,8 +44,8 @@ def read_yuv422(image_path, height, width):
             # vt[m, n] = ord(fp.read(1))
             
     #uv = np.concatenate((ut.reshape(-1), vt.reshape(-1)), axis = 2)
-    #image = np.concatenate((yt.reshape(-1), uv.reshape(-1)), axis = 0)
-    #img = image.reshape((height * 2, width)).astype('uint8') # YUV422sp 的存储格式为：NV16（YY UV）
+    #images = np.concatenate((yt.reshape(-1), uv.reshape(-1)), axis = 0)
+    #img = images.reshape((height * 2, width)).astype('uint8') # YUV422sp 的存储格式为：NV16（YY UV）
     yt = yt[np.newaxis,:,:]
     uv = uv[np.newaxis,:,:]
     print(yt.shape)
@@ -68,8 +68,8 @@ for i in range(len(imagelist)):
     image_name, exten = os.path.splitext(imagelist[i])
     out_name = os.path.join(out_path + image_name + '.jpg')
     image = read_yuv422(in_name, 441, 358)
-    #print(image.shape)
-    #bgr_img = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_NV16)
+    #print(images.shape)
+    #bgr_img = cv2.cvtColor(images, cv2.COLOR_YUV2BGR_NV16)
     #cv2.imwrite(out_name, bgr_img)
     
     

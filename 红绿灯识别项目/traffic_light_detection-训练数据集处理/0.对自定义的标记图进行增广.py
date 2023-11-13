@@ -8,7 +8,7 @@ import random
 import os
 import copy
 
-# 自定义随机生成、扩展新的标注覆盖 mask image
+# 自定义随机生成、扩展新的标注覆盖 mask images
 class generate_more_type_image:
 
     def __init__(self):
@@ -55,7 +55,7 @@ class generate_more_type_image:
         images_aug = seq.augment_images(input_img)
         image = Image.fromarray(images_aug)
         return image
-        # image.save('3.jpg')
+        # images.save('3.jpg')
 
     def create_generate_image(self,):
         # for mask_classify_label in self.new_mask_lable_classify_map:
@@ -91,49 +91,49 @@ a.create_generate_image()
 # noise=iaa.AdditiveGaussianNoise(10,40)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test10-40.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test10-40.jpg')
 #
 # noise=iaa.AdditiveGaussianNoise(20,40)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test20-40.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test20-40.jpg')
 #
 # noise=iaa.AdditiveGaussianNoise(10,10)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test10-10.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test10-10.jpg')
 #
 # noise=iaa.AdditiveGaussianNoise(10,20)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test10-20.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test10-20.jpg')
 #
 #
 # noise=iaa.AdditiveGaussianNoise(0,0)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test0-0.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test0-0.jpg')
 #
 # noise=iaa.AdditiveGaussianNoise(100,200)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test100-200.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test100-200.jpg')
 #
 # noise=iaa.AdditiveGaussianNoise(0.1,0.2)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test0.1-0.2.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test0.1-0.2.jpg')
 #
 # noise=iaa.AdditiveGaussianNoise(30,30)
 # input_noise=noise.augment_image(input_img)
 #
-# image= Image.fromarray(input_noise)
-# image.save('test30-30.jpg')
+# images= Image.fromarray(input_noise)
+# images.save('test30-30.jpg')
 #

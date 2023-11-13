@@ -101,7 +101,7 @@ class Loggers():
             self.wandb.current_epoch = epoch + 1
 
     def on_val_image_end(self, pred, predn, path, names, im):
-        # Callback runs on val image end
+        # Callback runs on val images end
         if self.wandb:
             self.wandb.val_one_image(pred, predn, path, names, im)
 
@@ -139,7 +139,7 @@ class Loggers():
             self.wandb.end_epoch(best_result=best_fitness == fi)
 
     def on_model_save(self, last, epoch, final_epoch, best_fitness, fi):
-        # Callback runs on model save event
+        # Callback runs on models save event
         if self.wandb:
             if ((epoch + 1) % self.opt.save_period == 0 and not final_epoch) and self.opt.save_period != -1:
                 self.wandb.log_model(last.parent, self.opt, epoch, fi, best_model=best_fitness == fi)
@@ -161,7 +161,7 @@ class Loggers():
             self.wandb.log({"Results": [wandb.Image(str(f), caption=f.name) for f in files]})
             # Calling wandb.log. TODO: Refactor this into WandbLogger.log_model
             if not self.opt.evolve:
-                wandb.log_artifact(str(best if best.exists() else last), type='model',
+                wandb.log_artifact(str(best if best.exists() else last), type='models',
                                    name='run_' + self.wandb.wandb_run.id + '_model',
                                    aliases=['latest', 'best', 'stripped'])
                 self.wandb.finish_run()

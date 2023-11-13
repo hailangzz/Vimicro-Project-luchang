@@ -78,10 +78,10 @@ if __name__ == '__main__':
                        help='A argument for output directory')
 
     parser.add_argument('--num_pos_images', 
-                       help='A argument for the number of Positive images per Query image')
+                       help='A argument for the number of Positive images per Query images')
 
     parser.add_argument('--num_neg_images', 
-                       help='A argument for the number of Negative images per Query image')                                              
+                       help='A argument for the number of Negative images per Query images')
     
     args = parser.parse_args()
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
 
     print ("Input Directory: "+args.input_directory)
     print ("Output Directory: "+args.output_directory)
-    print ("Number of Positive image per Query image: "+args.num_pos_images)
-    print ("Number of Negative image per Query image: "+args.num_neg_images)
+    print ("Number of Positive images per Query images: "+args.num_pos_images)
+    print ("Number of Negative images per Query images: "+args.num_neg_images)
 
     triplet_sampler(directory_path=args.input_directory, output_path=args.output_directory, num_neg_images=args.num_neg_images, num_pos_images=args.num_pos_images)

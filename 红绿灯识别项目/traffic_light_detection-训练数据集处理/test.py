@@ -9,7 +9,7 @@ import random
 
 def get_thr_coco_value(path='./data/ccpd.yaml'): # 获取标注框的长宽比范围值
     with open(path, 'rb') as f:
-        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
         print(data_dict)
 
     total_images_list = os.listdir(data_dict['train']+'/../labels')

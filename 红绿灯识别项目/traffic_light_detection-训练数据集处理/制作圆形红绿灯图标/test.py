@@ -41,5 +41,5 @@ back_image = Image.open(r'E:\paddle_训练数据集\ICDAR2019-LSVT\voc_dataset\J
 
 back_image = mix(back_image,image, (0, 0))
 
-# back_image.paste(image, [0,0])
+# back_image.paste(images, [0,0])
 back_image.show()

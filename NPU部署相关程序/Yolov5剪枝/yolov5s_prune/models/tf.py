@@ -209,7 +209,7 @@ class TFDetect(keras.layers.Layer):
         self.anchor_grid = tf.reshape(self.anchors * tf.reshape(self.stride, [self.nl, 1, 1]),
                                       [self.nl, 1, -1, 1, 2])
         self.m = [TFConv2d(x, self.no * self.na, 1, w=w.m[i]) for i, x in enumerate(ch)]
-        self.training = False  # set to False after building model
+        self.training = False  # set to False after building models
         self.imgsz = imgsz
         for i in range(self.nl):
             ny, nx = self.imgsz[0] // self.stride[i], self.imgsz[1] // self.stride[i]
@@ -321,17 +321,17 @@ def parse_model(d, ch, model, imgsz):  # model_dict, input_channels(3)
 
 
 class TFModel:
-    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None, model=None, imgsz=(640, 640)):  # model, channels, classes
+    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None, model=None, imgsz=(640, 640)):  # models, channels, classes
         super().__init__()
         if isinstance(cfg, dict):
-            self.yaml = cfg  # model dict
+            self.yaml = cfg  # models dict
         else:  # is *.yaml
             import yaml  # for torch hub
             self.yaml_file = Path(cfg).name
             with open(cfg) as f:
-                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # models dict
 
-        # Define model
+        # Define models
         if nc and nc != self.yaml['nc']:
             LOGGER.info(f"Overriding {cfg} nc={self.yaml['nc']} with nc={nc}")
             self.yaml['nc'] = nc  # override yaml value
@@ -424,23 +424,23 @@ def run(weights=ROOT / 'yolov5s.pt',  # weights path
         batch_size=1,  # batch size
         dynamic=False,  # dynamic batch size
         ):
-    # PyTorch model
-    im = torch.zeros((batch_size, 3, *imgsz))  # BCHW image
+    # PyTorch models
+    im = torch.zeros((batch_size, 3, *imgsz))  # BCHW images
     model = attempt_load(weights, map_location=torch.device('cpu'), inplace=True, fuse=False)
     y = model(im)  # inference
     model.info()
 
-    # TensorFlow model
-    im = tf.zeros((batch_size, *imgsz, 3))  # BHWC image
+    # TensorFlow models
+    im = tf.zeros((batch_size, *imgsz, 3))  # BHWC images
     tf_model = TFModel(cfg=model.yaml, model=model, nc=model.nc, imgsz=imgsz)
     y = tf_model.predict(im)  # inference
 
-    # Keras model
+    # Keras models
     im = keras.Input(shape=(*imgsz, 3), batch_size=None if dynamic else batch_size)
     keras_model = keras.Model(inputs=im, outputs=tf_model.predict(im))
     keras_model.summary()
 
-    LOGGER.info('PyTorch, TensorFlow and Keras models successfully verified.\nUse export.py for TF model export.')
+    LOGGER.info('PyTorch, TensorFlow and Keras models successfully verified.\nUse export.py for TF models export.')
 
 
 def parse_opt():

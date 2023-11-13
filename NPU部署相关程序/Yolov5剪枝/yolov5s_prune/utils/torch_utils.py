@@ -143,12 +143,12 @@ def profile(input, ops, n=10, device=None):
 
 
 def is_parallel(model):
-    # Returns True if model is of type DP or DDP
+    # Returns True if models is of type DP or DDP
     return type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)
 
 
 def de_parallel(model):
-    # De-parallelize a model: returns single-GPU model if model is of type DP or DDP
+    # De-parallelize a models: returns single-GPU models if models is of type DP or DDP
     return model.module if is_parallel(model) else model
 
 
@@ -170,7 +170,7 @@ def find_modules(model, mclass=nn.Conv2d):
 
 
 def sparsity(model):
-    # Return global model sparsity
+    # Return global models sparsity
     a, b = 0, 0
     for p in model.parameters():
         a += p.numel()
@@ -179,9 +179,9 @@ def sparsity(model):
 
 
 def prune(model, amount=0.3):
-    # Prune model to requested global sparsity
+    # Prune models to requested global sparsity
     import torch.nn.utils.prune as prune
-    print('Pruning model... ', end='')
+    print('Pruning models... ', end='')
     for name, m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             prune.l1_unstructured(m, name='weight', amount=amount)  # prune
@@ -275,7 +275,7 @@ class EarlyStopping:
         stop = delta >= self.patience  # stop training if patience exceeded
         if stop:
             LOGGER.info(f'Stopping training early as no improvement observed in last {self.patience} epochs. '
-                        f'Best results observed at epoch {self.best_epoch}, best model saved as best.pt.\n'
+                        f'Best results observed at epoch {self.best_epoch}, best models saved as best.pt.\n'
                         f'To update EarlyStopping(patience={self.patience}) pass a new patience value, '
                         f'i.e. `python train.py --patience 300` or use `--patience 0` to disable EarlyStopping.')
         return stop
@@ -283,18 +283,18 @@ class EarlyStopping:
 
 class ModelEMA:
     """ Model Exponential Moving Average from https://github.com/rwightman/pytorch-image-models
-    Keep a moving average of everything in the model state_dict (parameters and buffers).
+    Keep a moving average of everything in the models state_dict (parameters and buffers).
     This is intended to allow functionality like
     https://www.tensorflow.org/api_docs/python/tf/train/ExponentialMovingAverage
     A smoothed version of the weights is necessary for some training schemes to perform well.
-    This class is sensitive where it is initialized in the sequence of model init,
+    This class is sensitive where it is initialized in the sequence of models init,
     GPU assignment and distributed training wrappers.
     """
 
     def __init__(self, model, decay=0.9999, updates=0):
         # Create EMA
         self.ema = deepcopy(model.module if is_parallel(model) else model).eval()  # FP32 EMA
-        # if next(model.parameters()).device.type != 'cpu':
+        # if next(models.parameters()).device.type != 'cpu':
         #     self.ema.half()  # FP16 EMA
         self.updates = updates  # number of EMA updates
         self.decay = lambda x: decay * (1 - math.exp(-x / 2000))  # decay exponential ramp (to help early epochs)
@@ -307,7 +307,7 @@ class ModelEMA:
             self.updates += 1
             d = self.decay(self.updates)
 
-            msd = model.module.state_dict() if is_parallel(model) else model.state_dict()  # model state_dict
+            msd = model.module.state_dict() if is_parallel(model) else model.state_dict()  # models state_dict
             for k, v in self.ema.state_dict().items():
                 if v.dtype.is_floating_point:
                     v *= d

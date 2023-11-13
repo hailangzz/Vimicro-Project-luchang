@@ -69,7 +69,7 @@ def process_mask(protos, masks_in, bboxes, shape, upsample=False):
 
 def scale_image(im1_shape, masks, im0_shape, ratio_pad=None):
     """
-    img1_shape: model input shape, [h, w]
+    img1_shape: models input shape, [h, w]
     img0_shape: origin pic shape, [h, w, 3]
     masks: [h, w, num]
     """

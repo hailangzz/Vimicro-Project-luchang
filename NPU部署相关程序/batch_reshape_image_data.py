@@ -8,7 +8,7 @@ def image_resize(image_path, new_path):
         img_path = image_path + "/" + img_name
         image = Image.open(img_path)
         image = image.resize((1024,576))
-        # process the 1 channel image
+        # process the 1 channel images
         image.save(new_path + '/' + img_name)
     print("end the processing!")
 

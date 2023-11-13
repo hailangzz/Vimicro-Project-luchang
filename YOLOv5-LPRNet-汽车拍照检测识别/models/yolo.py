@@ -43,20 +43,20 @@ class Detect(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, model_cfg='yolov5s.yaml', ch=3, nc=None):  # model, input channels, number of classes
+    def __init__(self, model_cfg='yolov5s.yaml', ch=3, nc=None):  # models, input channels, number of classes
         super(Model, self).__init__()
         if type(model_cfg) is dict:
-            self.md = model_cfg  # model dict
+            self.md = model_cfg  # models dict
         else:  # is *.yaml
             import yaml  # for torch hub
             with open(model_cfg) as f:
-                self.md = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+                self.md = yaml.load(f, Loader=yaml.FullLoader)  # models dict
 
-        # Define model
+        # Define models
         if nc and nc != self.md['nc']:
             print('Overriding %s nc=%g with nc=%g' % (model_cfg, self.md['nc'], nc))
             self.md['nc'] = nc  # override yaml value
-        self.model, self.save = parse_model(self.md, ch=[ch])  # model, savelist, ch_out
+        self.model, self.save = parse_model(self.md, ch=[ch])  # models, savelist, ch_out
         # print([x.shape for x in self.forward(torch.zeros(1, ch, 64, 64))])
 
         # Build strides, anchors
@@ -126,7 +126,7 @@ class Model(nn.Module):
         for f, s in zip(m.f, m.stride):  #  from
             mi = self.model[f % m.i]
             b = mi.bias.view(m.na, -1)  # conv.bias(255) to (3,85)
-            b[:, 4] += math.log(8 / (640 / s) ** 2)  # obj (8 objects per 640 image)
+            b[:, 4] += math.log(8 / (640 / s) ** 2)  # obj (8 objects per 640 images)
             b[:, 5:] += math.log(0.6 / (m.nc - 0.99)) if cf is None else torch.log(cf / cf.sum())  # cls
             mi.bias = torch.nn.Parameter(b.view(-1), requires_grad=True)
 
@@ -137,11 +137,11 @@ class Model(nn.Module):
             print(('%g Conv2d.bias:' + '%10.3g' * 6) % (f, *b[:5].mean(1).tolist(), b[5:].mean()))
 
     # def _print_weights(self):
-    #     for m in self.model.modules():
+    #     for m in self.models.modules():
     #         if type(m) is Bottleneck:
     #             print('%10.3g' % (m.w.detach().sigmoid() * 2))  # shortcut weights
 
-    def fuse(self):  # fuse model Conv2d() + BatchNorm2d() layers
+    def fuse(self):  # fuse models Conv2d() + BatchNorm2d() layers
         print('Fusing layers... ', end='')
         for m in self.model.modules():
             if type(m) is Conv:
@@ -213,27 +213,27 @@ def parse_model(md, ch):  # model_dict, input_channels(3)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='model.yaml')
+    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='models.yaml')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     opt = parser.parse_args()
     opt.cfg = check_file(opt.cfg)  # check file
     device = torch_utils.select_device(opt.device)
 
-    # Create model
+    # Create models
     model = Model(opt.cfg).to(device)
     model.train()
 
     # Profile
     # img = torch.rand(8 if torch.cuda.is_available() else 1, 3, 640, 640).to(device)
-    # y = model(img, profile=True)
+    # y = models(img, profile=True)
 
     # ONNX export
-    # model.model[-1].export = True
-    # torch.onnx.export(model, img, opt.cfg.replace('.yaml', '.onnx'), verbose=True, opset_version=11)
+    # models.models[-1].export = True
+    # torch.onnx.export(models, img, opt.cfg.replace('.yaml', '.onnx'), verbose=True, opset_version=11)
 
     # Tensorboard
     # from torch.utils.tensorboard import SummaryWriter
     # tb_writer = SummaryWriter()
     # print("Run 'tensorboard --logdir=models/runs' to view tensorboard at http://localhost:6006/")
-    # tb_writer.add_graph(model.model, img)  # add model to tensorboard
-    # tb_writer.add_image('test', img[0], dataformats='CWH')  # add model to tensorboard
+    # tb_writer.add_graph(models.models, img)  # add models to tensorboard
+    # tb_writer.add_image('test', img[0], dataformats='CWH')  # add models to tensorboard

@@ -1,6 +1,6 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
-Validate a trained YOLOv5 model accuracy on a custom dataset
+Validate a trained YOLOv5 models accuracy on a custom dataset
 
 Usage:
     $ python path/to/val.py --data coco128.yaml --weights yolov5s.pt --img 640
@@ -32,7 +32,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 @torch.no_grad()
 def prune(data,
-          weights=None,  # model.pt path(s)
+          weights=None,  # models.pt path(s)
           cfg='models/yolov5l.yaml',
           percent=0,
           batch_size=32,  # batch size
@@ -63,11 +63,11 @@ def prune(data,
           val_in_prune=True,
           ):
 
-    # Initialize/load model and set device
+    # Initialize/load models and set device
     training = model is not None
 
     if training:  # called by train.py
-        # get model device, PyTorch model
+        # get models device, PyTorch models
         device, pt, jit, engine = next(
             model.parameters()).device, True, False, False
 
@@ -82,10 +82,10 @@ def prune(data,
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True,
                                                               exist_ok=True)  # make dir
 
-        # Load model 加载模型参数等信息
+        # Load models 加载模型参数等信息
         model = DetectMultiBackend(weights, device=device, dnn=dnn, fuse=False)
         stride, pt, jit, engine = model.stride, model.pt, model.jit, model.engine
-        imgsz = check_img_size(imgsz, s=stride)  # check image size
+        imgsz = check_img_size(imgsz, s=stride)  # check images size
         data = check_dataset(data)  # check
 
     # Configure
@@ -93,7 +93,7 @@ def prune(data,
 
     model.eval()
 
-    # prune model start 开始进行模型的剪枝操作：ignore_bn_list为不进行剪枝的:batch_node
+    # prune models start 开始进行模型的剪枝操作：ignore_bn_list为不进行剪枝的:batch_node
     model_list, ignore_bn_list = get_bn_list(model)
 
     # replace origin yaml with pruned yaml #pruned_yaml相对于原始给定的模型结构框架只是替换了C3，SPFF的算子名称而已
@@ -112,9 +112,9 @@ def prune(data,
 
     pruned_model = prune_model_load_weight(model, pruned_model, mask_bn)
     pruned_model.names = model.names
-    # prune model end
+    # prune models end
 
-    torch.save({'model': deepcopy(de_parallel(pruned_model)).half(), }, save_dir / "pruned_model.pt")
+    torch.save({'models': deepcopy(de_parallel(pruned_model)).half(), }, save_dir / "pruned_model.pt")
     # pruned_model.cuda().eval()
     pruned_model.eval() # cpu
     is_coco = isinstance(data.get('val'), str) and data['val'].endswith('coco/val2017.txt')  # COCO dataset
@@ -151,9 +151,9 @@ def parse_opt():
     parser.add_argument('--data', type=str, default=ROOT /
                         'data/PrivacyMaskingCarPlateFace.yaml', help='dataset.yaml path')
     parser.add_argument('--weights', nargs='+', type=str, default=
-                        r'D:\迅雷下载\AI数据集汇总\\runs/train/PrivacyMasking_yolov5s_pruned3/weights/last.pt', help='model.pt path(s)')
+                        r'D:\迅雷下载\AI数据集汇总\\runs/train/PrivacyMasking_yolov5s_pruned3/weights/last.pt', help='models.pt path(s)')
     parser.add_argument('--cfg', type=str,
-                        default=ROOT / 'models/yolov5s_PrivacyMaskingCarPlateFace.yaml', help='model.yaml path')
+                        default=ROOT / 'models/yolov5s_PrivacyMaskingCarPlateFace.yaml', help='models.yaml path')
     parser.add_argument('--percent', type=float,
                         default=0.43, help='prune percentage')
     parser.add_argument('--batch-size', type=int,

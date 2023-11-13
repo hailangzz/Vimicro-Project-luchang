@@ -1,4 +1,4 @@
-"""Run inference with a YOLOv5 model on images, videos, directories, streams
+"""Run inference with a YOLOv5 models on images, videos, directories, streams
 
 Usage:
     $ python path/to/detect.py --source path/to/img.jpg --weights yolov5s.pt --img 640
@@ -95,10 +95,10 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
 
     # 2.2、载入一些模型参数
     # stride: 模型最大的下采样率 [8, 16, 32] 所有stride一般为32
-    stride = int(model.stride.max())  # model stride
+    stride = int(model.stride.max())  # models stride
 
     # 确保输入图片的尺寸imgsz能整除stride=32 如果不能则调整为能被整除并返回
-    imgsz = check_img_size(imgsz, s=stride)  # check image size 保证img size必须是32的倍数
+    imgsz = check_img_size(imgsz, s=stride)  # check images size 保证img size必须是32的倍数
 
     # 得到数据集的所有类的类名
     names = ['licence']   # get class names
@@ -113,7 +113,7 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
     classify = False
     if classify:
         modelc = load_classifier(name='resnet50', n=2)  # initialize
-        modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+        modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['models']).to(device).eval()
 
 
     # ===================================== 3、加载推理数据 =====================================
@@ -123,7 +123,7 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
     if webcam:
         # 一般不会使用webcam模式从网页中获取数据
         view_img = check_imshow()
-        cudnn.benchmark = True  # set True to speed up constant image size inference
+        cudnn.benchmark = True  # set True to speed up constant images size inference
         dataset = LoadStreams(source, img_size=imgsz)
     else:
         # 一般是直接从source文件目录下直接读取图片或者视频数据
@@ -175,7 +175,7 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
 
         # 5.5、后续保存或者打印预测信息
         # 对每张图片进行处理  将pred(相对img_size 640)映射回原图img0 size
-        for i, det in enumerate(pred):  # detections per image
+        for i, det in enumerate(pred):  # detections per images
             if webcam:
                 # 如果输入源是webcam（网页）则batch_size>=1 取出dataset中的一张图片
                 p, s, im0, frame = path[i], f'{i}: ', im0s[i].copy(), dataset.count
@@ -192,7 +192,7 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
             # 图片/视频的保存路径save_path 如 runs\\detect\\exp8\\bus.jpg
             save_path = str(save_dir / p.name)  # img.jpg
             # txt文件(保存预测框坐标)保存路径 如 runs\\detect\\exp8\\labels\\bus
-            txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # img.txt
+            txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'images' else f'_{frame}')  # img.txt
 
             # print string  输出信息  图片shape (w, h)
             s += '%gx%g ' % img.shape[2:]
@@ -255,7 +255,7 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
                 cv2.imshow(str(p), im0)
                 cv2.waitKey(1)  # 1 millisecond
 
-            # Save results (image with detections)
+            # Save results (images with detections)
             # 是否需要保存图片或视频（检测后的图片/视频 里面已经被我们画好了框的） img0
             if save_img:
                 if dataset.mode == 'images':
@@ -285,7 +285,7 @@ def run(weights='weights/yolov5s.pt',  # 权重文件地址 默认 weights/yolov
 
     if update:
         # strip_optimizer函数将optimizer从ckpt中删除  更新模型
-        strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
+        strip_optimizer(weights)  # update models (to fix SourceChangeWarning)
 
     # 打印预测的总时间
     print(f'Done. ({time.time() - t0:.3f}s)')
@@ -319,12 +319,12 @@ def parse_opt():
     half: 是否使用半精度 Float16 推理 可以缩短推理时间 但是默认是False
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default=r'K:\MyProject\YOLOv5-LPRNet-Licence-Recognition\weights\yolov5_best.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default=r'K:\MyProject\YOLOv5-LPRNet-Licence-Recognition\weights\yolov5_best.pt', help='models.pt path(s)')
     parser.add_argument('--source', type=str, default=r'K:\MyProject\YOLOv5-LPRNet-Licence-Recognition\demo\images\\', help='file/dir/URL/glob, 0 for webcam')
     parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')
-    parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per image')
+    parser.add_argument('--max-det', type=int, default=1000, help='maximum detections per images')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='show results')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
@@ -342,7 +342,7 @@ def parse_opt():
     parser.add_argument('--hide-labels', default=False, action='store_true', help='hide labels')
     parser.add_argument('--hide-conf', default=False, action='store_true', help='hide confidences')
     parser.add_argument('--half', action='store_true', help='use FP16 half-precision inference')
-    parser.add_argument('--prune-model', default=False, action='store_true', help='model prune')
+    parser.add_argument('--prune-models', default=False, action='store_true', help='models prune')
     parser.add_argument('--fuse', default=False, action='store_true', help='fuse conv and bn')
     opt = parser.parse_args()
     return opt

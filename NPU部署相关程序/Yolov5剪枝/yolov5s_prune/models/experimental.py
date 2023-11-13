@@ -90,14 +90,14 @@ class Ensemble(nn.ModuleList):
 def attempt_load(weights, map_location=None, inplace=True, fuse=True):
     from models.yolo import Detect, Model
 
-    # Loads an ensemble of models weights=[a,b,c] or a single model weights=[a] or weights=a
+    # Loads an ensemble of models weights=[a,b,c] or a single models weights=[a] or weights=a
     model = Ensemble()
     for w in weights if isinstance(weights, list) else [weights]:
         ckpt = torch.load(attempt_download(w), map_location=map_location)  # load
         if fuse:
-            model.append(ckpt['ema' if ckpt.get('ema') else 'model'].float().fuse().eval())  # FP32 model
+            model.append(ckpt['ema' if ckpt.get('ema') else 'models'].float().fuse().eval())  # FP32 models
         else:
-            model.append(ckpt['ema' if ckpt.get('ema') else 'model'].float().eval())  # without layer fuse
+            model.append(ckpt['ema' if ckpt.get('ema') else 'models'].float().eval())  # without layer fuse
 
     # Compatibility updates
     for m in model.modules():
@@ -111,7 +111,7 @@ def attempt_load(weights, map_location=None, inplace=True, fuse=True):
             m._non_persistent_buffers_set = set()  # pytorch 1.6.0 compatibility
 
     if len(model) == 1:
-        return model[-1]  # return model
+        return model[-1]  # return models
     else:
         print(f'Ensemble created with {weights}\n')
         for k in ['names']:

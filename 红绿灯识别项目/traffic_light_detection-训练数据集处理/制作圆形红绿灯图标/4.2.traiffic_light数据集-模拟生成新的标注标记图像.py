@@ -159,7 +159,7 @@ class Create_train_sample:
                                                                                      1:-1])
                         train_cur.write('\n')
                     except:
-                        print(sample_image_name,': this image is error!!!')
+                        print(sample_image_name,': this images is error!!!')
             train_cur.close()
             origin_image.save(os.path.join(self.save_coco_dataset_path,sample_type,'images', sample_image_name.replace('.jpg','_new%s.jpg'%sample_num)))
 

@@ -16,7 +16,7 @@ def xywh2xyxy(coco_info=[0.333854,0.559259,0.0114583,0.0537037],image_shape=[720
 
 def cut_crops_function(image_path, box_info_list,save_detect_crops_path,train_image_size=[1024,576]):
     image = Image.open(image_path)
-    # print(image.size)
+    # print(images.size)
     image_shape = [image.size[0],image.size[1]]
     for detect_box_info_index in range(len(box_info_list)):
         detect_box_info = box_info_list[detect_box_info_index]

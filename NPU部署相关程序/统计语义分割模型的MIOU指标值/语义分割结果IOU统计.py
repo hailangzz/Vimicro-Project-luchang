@@ -30,7 +30,7 @@ def get_single_iou_value(bool_array_left,bool_array_right):
     return single_iou
 
 def read_predict_image(image_path):
-    image = Image.open(image_path)  # 将 'image.jpg' 替换为您要打开的图像文件路径
+    image = Image.open(image_path)  # 将 'images.jpg' 替换为您要打开的图像文件路径
     # 将图像转换为NumPy数组
     image_array = np.array(image)
     return image_array
@@ -38,7 +38,7 @@ def read_predict_image(image_path):
 
 
 image_path = r"F:\开发板U盘系统备份\toluchang_20230608\result\79.jpg"
-image_path2 = r"F:\开发板U盘系统备份\toluchang_20230608\result\80.jpg"
+image_path2 = r"F:\开发板U盘系统备份\toluchang_20230608\result\79.jpg"
 image_array1 = read_predict_image(image_path)
 bool_array1 = bool_image_value(image_array1)
 

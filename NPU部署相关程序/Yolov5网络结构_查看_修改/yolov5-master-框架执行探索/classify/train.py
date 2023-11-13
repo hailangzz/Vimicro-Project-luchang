@@ -1,16 +1,16 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
-Train a YOLOv5 classifier model on a classification dataset
+Train a YOLOv5 classifier models on a classification dataset
 
 Usage - Single-GPU training:
-    $ python classify/train.py --model yolov5s-cls.pt --data imagenette160 --epochs 5 --img 224
+    $ python classify/train.py --models yolov5s-cls.pt --data imagenette160 --epochs 5 --img 224
 
 Usage - Multi-GPU DDP training:
-    $ python -m torch.distributed.run --nproc_per_node 4 --master_port 1 classify/train.py --model yolov5s-cls.pt --data imagenet --epochs 5 --img 224 --device 0,1,2,3
+    $ python -m torch.distributed.run --nproc_per_node 4 --master_port 1 classify/train.py --models yolov5s-cls.pt --data imagenet --epochs 5 --img 224 --device 0,1,2,3
 
 Datasets:           --data mnist, fashion-mnist, cifar10, cifar100, imagenette, imagewoof, imagenet, or 'path/to/data'
-YOLOv5-cls models:  --model yolov5n-cls.pt, yolov5s-cls.pt, yolov5m-cls.pt, yolov5l-cls.pt, yolov5x-cls.pt
-Torchvision models: --model resnet50, efficientnet_b0, etc. See https://pytorch.org/vision/stable/models.html
+YOLOv5-cls models:  --models yolov5n-cls.pt, yolov5s-cls.pt, yolov5m-cls.pt, yolov5l-cls.pt, yolov5x-cls.pt
+Torchvision models: --models resnet50, efficientnet_b0, etc. See https://pytorch.org/vision/stable/models.html
 """
 
 import argparse
@@ -112,10 +112,10 @@ def train(opt, device):
             model = torchvision.models.__dict__[opt.model](weights='IMAGENET1K_V1' if pretrained else None)
         else:
             m = hub.list('ultralytics/yolov5')  # + hub.list('pytorch/vision')  # models
-            raise ModuleNotFoundError(f'--model {opt.model} not found. Available models are: \n' + '\n'.join(m))
+            raise ModuleNotFoundError(f'--models {opt.model} not found. Available models are: \n' + '\n'.join(m))
         if isinstance(model, DetectionModel):
-            LOGGER.warning("WARNING ⚠️ pass YOLOv5 classifier model with '-cls' suffix, i.e. '--model yolov5s-cls.pt'")
-            model = ClassificationModel(model=model, nc=nc, cutoff=opt.cutoff or 10)  # convert to classification model
+            LOGGER.warning("WARNING ⚠️ pass YOLOv5 classifier models with '-cls' suffix, i.e. '--models yolov5s-cls.pt'")
+            model = ClassificationModel(model=model, nc=nc, cutoff=opt.cutoff or 10)  # convert to classification models
         reshape_classifier_output(model, nc)  # update class count
     for m in model.modules():
         if not pretrained and hasattr(m, 'reset_parameters'):
@@ -136,7 +136,7 @@ def train(opt, device):
         images, labels = next(iter(trainloader))
         file = imshow_cls(images[:25], labels[:25], names=model.names, f=save_dir / 'train_images.jpg')
         logger.log_images(file, name='Train Examples')
-        logger.log_graph(model, imgsz)  # log model
+        logger.log_graph(model, imgsz)  # log models
 
     # Optimizer
     optimizer = smart_optimizer(model, opt.optimizer, opt.lr0, momentum=0.9, decay=opt.decay)
@@ -226,13 +226,13 @@ def train(opt, device):
                 "lr/0": optimizer.param_groups[0]['lr']}  # learning rate
             logger.log_metrics(metrics, epoch)
 
-            # Save model
+            # Save models
             final_epoch = epoch + 1 == epochs
             if (not opt.nosave) or final_epoch:
                 ckpt = {
                     'epoch': epoch,
                     'best_fitness': best_fitness,
-                    'model': deepcopy(ema.ema).half(),  # deepcopy(de_parallel(model)).half(),
+                    'models': deepcopy(ema.ema).half(),  # deepcopy(de_parallel(models)).half(),
                     'ema': None,  # deepcopy(ema.ema).half(),
                     'updates': ema.updates,
                     'optimizer': None,  # optimizer.state_dict(),
@@ -252,7 +252,7 @@ def train(opt, device):
                     f"\nPredict:         python classify/predict.py --weights {best} --source im.jpg"
                     f"\nValidate:        python classify/val.py --weights {best} --data {data_dir}"
                     f"\nExport:          python export.py --weights {best} --include onnx"
-                    f"\nPyTorch Hub:     model = torch.hub.load('ultralytics/yolov5', 'custom', '{best}')"
+                    f"\nPyTorch Hub:     models = torch.hub.load('ultralytics/yolov5', 'custom', '{best}')"
                     f"\nVisualize:       https://netron.app\n")
 
         # Plot examples
@@ -268,11 +268,11 @@ def train(opt, device):
 
 def parse_opt(known=False):
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default='yolov5s-cls.pt', help='initial weights path')
+    parser.add_argument('--models', type=str, default='yolov5s-cls.pt', help='initial weights path')
     parser.add_argument('--data', type=str, default='imagenette160', help='cifar10, cifar100, mnist, imagenet, ...')
     parser.add_argument('--epochs', type=int, default=10, help='total training epochs')
     parser.add_argument('--batch-size', type=int, default=64, help='total batch size for all GPUs')
-    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=224, help='train, val image size (pixels)')
+    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=224, help='train, val images size (pixels)')
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
     parser.add_argument('--cache', type=str, nargs='?', const='ram', help='--cache images in "ram" (default) or "disk"')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
@@ -318,7 +318,7 @@ def main(opt):
 
 
 def run(**kwargs):
-    # Usage: from yolov5 import classify; classify.train.run(data=mnist, imgsz=320, model='yolov5m')
+    # Usage: from yolov5 import classify; classify.train.run(data=mnist, imgsz=320, models='yolov5m')
     opt = parse_opt(True)
     for k, v in kwargs.items():
         setattr(opt, k, v)

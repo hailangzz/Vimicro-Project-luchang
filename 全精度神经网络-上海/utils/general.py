@@ -379,7 +379,7 @@ def check_requirements(requirements=ROOT / 'requirements.txt', exclude=(), insta
 
 
 def check_img_size(imgsz, s=32, floor=0):
-    # Verify image size is a multiple of stride s in each dimension
+    # Verify images size is a multiple of stride s in each dimension
     if isinstance(imgsz, int):  # integer i.e. img_size=640
         new_size = max(make_divisible(imgsz, int(s)), floor)
     else:  # list i.e. img_size=[640, 480]
@@ -391,7 +391,7 @@ def check_img_size(imgsz, s=32, floor=0):
 
 
 def check_imshow(warn=False):
-    # Check if environment supports image displays
+    # Check if environment supports images displays
     try:
         assert not is_notebook()
         assert not is_docker()
@@ -531,17 +531,17 @@ def check_amp(model):
 
     def amp_allclose(model, im):
         # All close FP32 vs AMP results
-        m = AutoShape(model, verbose=False)  # model
+        m = AutoShape(model, verbose=False)  # models
         a = m(im).xywhn[0]  # FP32 inference
         m.amp = True
         b = m(im).xywhn[0]  # AMP inference
         return a.shape == b.shape and torch.allclose(a, b, atol=0.1)  # close to 10% absolute tolerance
 
     prefix = colorstr('AMP: ')
-    device = next(model.parameters()).device  # get model device
+    device = next(model.parameters()).device  # get models device
     if device.type in ('cpu', 'mps'):
         return False  # AMP only used on CUDA devices
-    f = ROOT / 'data' / 'images' / 'bus.jpg'  # image to check
+    f = ROOT / 'data' / 'images' / 'bus.jpg'  # images to check
     im = f if f.exists() else 'https://ultralytics.com/images/bus.jpg' if check_online() else np.ones((640, 640, 3))
     try:
         assert amp_allclose(deepcopy(model), im) or amp_allclose(DetectMultiBackend('yolov5n.pt', device), im)
@@ -683,7 +683,7 @@ def labels_to_class_weights(labels, nc=80):
     weights = np.bincount(classes, minlength=nc)  # occurrences per class
 
     # Prepend gridpoint count (for uCE training)
-    # gpi = ((320 / 32 * np.array([1, 2, 4])) ** 2 * 3).sum()  # gridpoints per image
+    # gpi = ((320 / 32 * np.array([1, 2, 4])) ** 2 * 3).sum()  # gridpoints per images
     # weights = np.hstack([gpi * len(labels)  - weights.sum() * 9, weights * 9]) ** 0.5  # prepend gridpoints to start
 
     weights[weights == 0] = 1  # replace empty bins with 1
@@ -693,8 +693,8 @@ def labels_to_class_weights(labels, nc=80):
 
 
 def labels_to_image_weights(labels, nc=80, class_weights=np.ones(80)):
-    # Produces image weights based on class_weights and image contents
-    # Usage: index = random.choices(range(n), weights=image_weights, k=1)  # weighted image sample
+    # Produces images weights based on class_weights and images contents
+    # Usage: index = random.choices(range(n), weights=image_weights, k=1)  # weighted images sample
     class_counts = np.array([np.bincount(x[:, 0].astype(int), minlength=nc) for x in labels])
     return (class_weights.reshape(1, nc) * class_counts).sum(1)
 
@@ -762,7 +762,7 @@ def xyn2xy(x, w=640, h=640, padw=0, padh=0):
 
 
 def segment2box(segment, width=640, height=640):
-    # Convert 1 segment label to 1 box label, applying inside-image constraint, i.e. (xy1, xy2, ...) to (xyxy)
+    # Convert 1 segment label to 1 box label, applying inside-images constraint, i.e. (xy1, xy2, ...) to (xyxy)
     x, y = segment.T  # segment xy
     inside = (x >= 0) & (y >= 0) & (x <= width) & (y <= height)
     x, y, = x[inside], y[inside]
@@ -821,7 +821,7 @@ def scale_segments(img1_shape, segments, img0_shape, ratio_pad=None):
 
 
 def clip_boxes(boxes, shape):
-    # Clip boxes (xyxy) to image shape (height, width)
+    # Clip boxes (xyxy) to images shape (height, width)
     if isinstance(boxes, torch.Tensor):  # faster individually
         boxes[:, 0].clamp_(0, shape[1])  # x1
         boxes[:, 1].clamp_(0, shape[0])  # y1
@@ -833,7 +833,7 @@ def clip_boxes(boxes, shape):
 
 
 def clip_segments(boxes, shape):
-    # Clip segments (xy1,xy2,...) to image shape (height, width)
+    # Clip segments (xy1,xy2,...) to images shape (height, width)
     if isinstance(boxes, torch.Tensor):  # faster individually
         boxes[:, 0].clamp_(0, shape[1])  # x
         boxes[:, 1].clamp_(0, shape[0])  # y
@@ -856,10 +856,10 @@ def non_max_suppression(
     """Non-Maximum Suppression (NMS) on inference results to reject overlapping detections
 
     Returns:
-         list of detections, on (n,6) tensor per image [xyxy, conf, cls]
+         list of detections, on (n,6) tensor per images [xyxy, conf, cls]
     """
 
-    if isinstance(prediction, (list, tuple)):  # YOLOv5 model in validation model, output = (inference_out, loss_out)
+    if isinstance(prediction, (list, tuple)):  # YOLOv5 models in validation models, output = (inference_out, loss_out)
         prediction = prediction[0]  # select only inference output
 
     device = prediction.device
@@ -886,7 +886,7 @@ def non_max_suppression(
     t = time.time()
     mi = 5 + nc  # mask start index
     output = [torch.zeros((0, 6 + nm), device=prediction.device)] * bs
-    for xi, x in enumerate(prediction):  # image index, image inference
+    for xi, x in enumerate(prediction):  # images index, images inference
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
         x = x[xc[xi]]  # confidence
@@ -900,7 +900,7 @@ def non_max_suppression(
             v[range(len(lb)), lb[:, 0].long() + 5] = 1.0  # cls
             x = torch.cat((x, v), 0)
 
-        # If none remain process next image
+        # If none remain process next images
         if not x.shape[0]:
             continue
 
@@ -964,12 +964,12 @@ def strip_optimizer(f='car_brand.pt', s=''):  # from utils.general import *; str
     # Strip optimizer from 'f' to finalize training, optionally save as 's'
     x = torch.load(f, map_location=torch.device('cpu'))
     if x.get('ema'):
-        x['model'] = x['ema']  # replace model with ema
+        x['models'] = x['ema']  # replace models with ema
     for k in 'optimizer', 'best_fitness', 'ema', 'updates':  # keys
         x[k] = None
     x['epoch'] = -1
-    x['model'].half()  # to FP16
-    for p in x['model'].parameters():
+    x['models'].half()  # to FP16
+    for p in x['models'].parameters():
         p.requires_grad = False
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1E6  # filesize
@@ -1017,9 +1017,9 @@ def print_mutation(keys, results, hyp, save_dir, bucket, prefix=colorstr('evolve
 
 def apply_classifier(x, model, img, im0):
     # Apply a second stage classifier to YOLO outputs
-    # Example model = torchvision.models.__dict__['efficientnet_b0'](pretrained=True).to(device).eval()
+    # Example models = torchvision.models.__dict__['efficientnet_b0'](pretrained=True).to(device).eval()
     im0 = [im0] if isinstance(im0, np.ndarray) else im0
-    for i, d in enumerate(x):  # per image
+    for i, d in enumerate(x):  # per images
         if d is not None and len(d):
             d = d.clone()
 

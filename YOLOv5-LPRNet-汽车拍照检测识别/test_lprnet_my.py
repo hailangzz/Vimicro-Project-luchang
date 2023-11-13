@@ -2,7 +2,7 @@
 # /usr/bin/env/python3
 
 '''
-test pretrained model.
+test pretrained models.
 Author: aiboy.wei@outlook.com .
 '''
 from torch.utils.data import DataLoader
@@ -74,7 +74,7 @@ def test():
     lprnet = LPRNet(lpr_max_len=8, phase=False, class_num=len(CHARS), dropout_rate=0).to(torch.device("cpu"))
     lprnet.load_state_dict(torch.load(r'D:\中星微人工智能工作\Total_Models\yolov5-LPRNet-车牌检测识别/lprnet_best.pth', map_location=torch.device('cpu')))
     lprnet.to(torch.device("cpu")).eval()
-    print("load rec pretrained model successful!")
+    print("load rec pretrained models successful!")
     print('torch.Tensor(img_crop):',torch.Tensor(img_crop),torch.Tensor(img_crop).shape)
 
     print(lprnet,torch.device("cpu"),type(torch.device("cpu")))
@@ -91,7 +91,7 @@ def test():
     # lprnet.to(LPR_device)  # 加载LPR网络
     # print("Successful to build lprnetwork!")
     #
-    # # load pretrained model 加载训练好的权重
+    # # load pretrained models 加载训练好的权重
     #
     # lprnet.load_state_dict(torch.load(r'D:\中星微人工智能工作\Total_Models\yolov5-LPRNet-车牌检测识别/lprnet_best.pth',map_location=torch.device('cpu')))
 

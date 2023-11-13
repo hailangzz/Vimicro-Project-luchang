@@ -12,7 +12,7 @@ class create_car_brand_rec_sample:
 
     def letterbox(self, img, new_shape=(48, 120), color=(114, 114, 114), auto=False, scaleFill=False, scaleup=True,
                   stride=32):
-        # Resize and pad image while meeting stride-multiple constraints
+        # Resize and pad images while meeting stride-multiple constraints
         shape = img.shape[:2]  # current shape [height, width]
         if isinstance(new_shape, int):
             new_shape = (new_shape, new_shape)
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     for single_car_brand in car_brand_images:
         image_path = os.path.join(image_source_path,single_car_brand)
         # print(image_path)
-        # image = cv2.imread(image_path)
+        # images = cv2.imread(image_path)
         image = cv2.imdecode(np.fromfile(image_path, dtype=np.uint8), -1)
 
         image = create_rec_sample.letterbox(image)

@@ -24,7 +24,7 @@ def download_model_checkpoint(opt, experiment):
     model_asset_list = experiment.get_model_asset_list(model_name)
 
     if len(model_asset_list) == 0:
-        logger.error(f"COMET ERROR: No checkpoints found for model name : {model_name}")
+        logger.error(f"COMET ERROR: No checkpoints found for models name : {model_name}")
         return
 
     model_asset_list = sorted(
@@ -95,7 +95,7 @@ def set_opt_parameters(opt, experiment):
 
 
 def check_comet_weights(opt):
-    """Downloads model weights from Comet and updates the
+    """Downloads models weights from Comet and updates the
     weights path to point to saved weights location
 
     Args:
@@ -122,7 +122,7 @@ def check_comet_weights(opt):
 
 
 def check_comet_resume(opt):
-    """Restores run parameters to its original state based on the model checkpoint
+    """Restores run parameters to its original state based on the models checkpoint
     and logged Experiment parameters.
 
     Args:

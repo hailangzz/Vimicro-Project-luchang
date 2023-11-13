@@ -34,12 +34,12 @@ hyp = {'optimizer': 'SGD',  # ['adam', 'SGD', None] if none, default is SGD
        'anchor_t': 4.0,  # anchor-multiple threshold
        'fl_gamma': 0.0,  # focal loss gamma (efficientDet default is gamma=1.5)
        'hsv_h': 0.014,  #  HSV-Saturation augmentation (fraction)
-       'hsv_v': 0.36,  # image image HSV-Hue augmentation (fraction)
+       'hsv_v': 0.36,  # images images HSV-Hue augmentation (fraction)
        'hsv_s': 0.68,  # imageHSV-Value augmentation (fraction)
-       'degrees': 0.0,  # image rotation (+/- deg)
-       'translate': 0.0,  # image translation (+/- fraction)
-       'scale': 0.5,  # image scale (+/- gain)
-       'shear': 0.0}  # image shear (+/- deg)
+       'degrees': 0.0,  # images rotation (+/- deg)
+       'translate': 0.0,  # images translation (+/- fraction)
+       'scale': 0.5,  # images scale (+/- gain)
+       'shear': 0.0}  # images shear (+/- deg)
 
 
 def train(hyp):
@@ -59,7 +59,7 @@ def train(hyp):
     # Configure
     init_seeds(1)
     with open(opt.data) as f:
-        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+        data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
     train_path = data_dict['train']
     test_path = data_dict['val']
     nc = 1 if opt.single_cls else int(data_dict['nc'])  # number of classes
@@ -68,7 +68,7 @@ def train(hyp):
     for f in glob.glob('*_batch*.jpg') + glob.glob(results_file):
         os.remove(f)
 
-    # Create model
+    # Create models
     model = Model(opt.cfg, nc=data_dict['nc']).to(device)
 
     # Image sizes
@@ -110,15 +110,15 @@ def train(hyp):
     if weights.endswith('.pt'):  # pytorch format
         ckpt = torch.load(weights, map_location=device)  # load checkpoint
 
-        # load model
+        # load models
         try:
-            ckpt['model'] = {k: v for k, v in ckpt['model'].float().state_dict().items()
+            ckpt['models'] = {k: v for k, v in ckpt['models'].float().state_dict().items()
                              if model.state_dict()[k].shape == v.shape}  # to FP32, filter
-            model.load_state_dict(ckpt['model'], strict=False)
+            model.load_state_dict(ckpt['models'], strict=False)
             for k, v in model.named_parameters():
                 print(v)
         except KeyError as e:
-            s = "%s is not compatible with %s. This may be due to model differences or %s may be out of date. " \
+            s = "%s is not compatible with %s. This may be due to models differences or %s may be out of date. " \
                 "Please delete or update %s and try again, or use --weights '' to train from scratch." \
                 % (opt.weights, opt.cfg, opt.weights, opt.weights)
             raise KeyError(s) from e
@@ -152,14 +152,14 @@ def train(hyp):
                                 init_method='tcp://127.0.0.1:9999',  # init method
                                 world_size=1,  # number of nodes
                                 rank=0)  # node rank
-        # model = torch.nn.parallel.DistributedDataParallel(model)
+        # models = torch.nn.parallel.DistributedDataParallel(models)
         # pip install torch==1.4.0+cu100 torchvision==0.5.0+cu100 -f https://download.pytorch.org/whl/torch_stable.html
 
     # Trainloader
     dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt,
                                             hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect)
     mlc = np.concatenate(dataset.labels, 0)[:, 0].max()  # max label class
-    assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Correct your labels or your model.' % (mlc, nc, opt.cfg)
+    assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Correct your labels or your models.' % (mlc, nc, opt.cfg)
 
     # Testloader
     testloader = create_dataloader(test_path, imgsz_test, batch_size, gs, opt,
@@ -167,8 +167,8 @@ def train(hyp):
 
     # Model parameters
     hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
-    model.nc = nc  # attach number of classes to model
-    model.hyp = hyp  # attach hyperparameters to model
+    model.nc = nc  # attach number of classes to models
+    model.hyp = hyp  # attach hyperparameters to models
     model.gr = 1.0  # giou loss ratio (obj_loss = 1.0 or giou)
     model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device)  # attach class weights
     model.names = data_dict['names']
@@ -183,7 +183,7 @@ def train(hyp):
     labels = np.concatenate(dataset.labels, 0)
     c = torch.tensor(labels[:, 0])  # classes
     # cf = torch.bincount(c.long(), minlength=nc) + 1.
-    # model._initialize_biases(cf.to(device))
+    # models._initialize_biases(cf.to(device))
     plot_labels(labels, save_dir=log_dir)
     if tb_writer:
         tb_writer.add_histogram('classes', c, 0)
@@ -209,7 +209,7 @@ def train(hyp):
     for epoch in range(start_epoch, epochs):  # epoch ------------------------------------------------------------------
         model.train()
 
-        # Update image weights (optional)
+        # Update images weights (optional)
         if dataset.image_weights:
             w = model.class_weights.cpu().numpy() * (1 - maps) ** 2  # class weights
             image_weights = labels_to_image_weights(dataset.labels, nc=nc, class_weights=w)
@@ -229,7 +229,7 @@ def train(hyp):
             # Warmup
             if ni <= nw:
                 xi = [0, nw]  # x interp
-                # model.gr = np.interp(ni, xi, [0.0, 1.0])  # giou loss ratio (obj_loss = 1.0 or giou)
+                # models.gr = np.interp(ni, xi, [0.0, 1.0])  # giou loss ratio (obj_loss = 1.0 or giou)
                 accumulate = max(1, np.interp(ni, xi, [1, nbs / batch_size]).round())
                 for j, x in enumerate(optimizer.param_groups):
                     # bias lr falls from 0.1 to lr0, all other lrs rise from 0.0 to lr0
@@ -280,7 +280,7 @@ def train(hyp):
                 result = plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                 if tb_writer and result is not None:
                     tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
-                    # tb_writer.add_graph(model, images)  # add model to tensorboard
+                    # tb_writer.add_graph(models, images)  # add models to tensorboard
 
             # end batch ------------------------------------------------------------------------------------------------
 
@@ -319,14 +319,14 @@ def train(hyp):
         if fi > best_fitness:
             best_fitness = fi
 
-        # Save model
+        # Save models
         save = (not opt.nosave) or (final_epoch and not opt.evolve)
         if save:
             with open(results_file, 'r') as f:  # create checkpoint
                 ckpt = {'epoch': epoch,
                         'best_fitness': best_fitness,
                         'training_results': f.read(),
-                        'model': ema.ema,
+                        'models': ema.ema,
                         'optimizer': None if final_epoch else optimizer.state_dict()}
 
             # Save last, best and delete
@@ -360,7 +360,7 @@ def train(hyp):
 if __name__ == '__main__':
     check_git_status()
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
+    parser.add_argument('--cfg', type=str, default='', help='models.yaml path')
     parser.add_argument('--data', type=str, default='', help='data.yaml path')
     parser.add_argument('--hyp', type=str, default='', help='hyp.yaml path (optional)')
     parser.add_argument('--weights', type=str, default='', help='initial weights path')

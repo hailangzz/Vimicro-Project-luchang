@@ -51,7 +51,7 @@ def adjust_learning_rate(optimizer, cur_epoch, base_lr, lr_schedule):
 def get_parser():
     parser = argparse.ArgumentParser(description='parameters to train net')
     parser.add_argument('--max_epoch', default=100, help='epoch to train the network')
-    parser.add_argument('--img_size', default=[94, 24], help='the image size')
+    parser.add_argument('--img_size', default=[94, 24], help='the images size')
     parser.add_argument('--train_img_dirs', default=r"/home/dataset//rec_car_brand_train_database_focus8_LPR", help='the train images path')
     parser.add_argument('--test_img_dirs', default=r"/home/vimicro/git_workspace/YOLOv5-LPRNet-master1/datasets/CCPD_rec_images/val/images/", help='the test images path')
     parser.add_argument('--dropout_rate', default=0.5, help='dropout rate.')
@@ -61,9 +61,9 @@ def get_parser():
     parser.add_argument('--test_batch_size', default=128, help='testing batch size.')
     parser.add_argument('--phase_train', default=True, type=bool, help='train or test phase flag.')
     parser.add_argument('--num_workers', default=0, type=int, help='Number of workers used in dataloading')
-    parser.add_argument('--cuda', default=True, type=bool, help='Use cuda to train model')
+    parser.add_argument('--cuda', default=True, type=bool, help='Use cuda to train models')
     parser.add_argument('--resume_epoch', default=0, type=int, help='resume iter for retraining')
-    parser.add_argument('--save_interval', default=500, type=int, help='interval for save model state dict')
+    parser.add_argument('--save_interval', default=500, type=int, help='interval for save models state dict')
     parser.add_argument('--test_interval', default=500, type=int, help='interval for evaluate')
     parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
     parser.add_argument('--weight_decay', default=2e-5, type=float, help='Weight decay for SGD')
@@ -103,10 +103,10 @@ def train():
     lprnet.to(device)
     print("Successful to build network!")
 
-    # load pretrained model
+    # load pretrained models
     if args.pretrained_model:
         lprnet.load_state_dict(torch.load(args.pretrained_model))
-        print("load pretrained model successful!")
+        print("load pretrained models successful!")
     else:
         def xavier(param):
             nn.init.xavier_uniform(param)

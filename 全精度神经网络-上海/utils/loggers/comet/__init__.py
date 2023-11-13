@@ -413,7 +413,7 @@ class CometLogger:
     def on_train_end(self, files, save_dir, last, best, epoch, results):
         if self.comet_log_predictions:
             curr_epoch = self.experiment.curr_epoch
-            self.experiment.log_asset_data(self.metadata_dict, "image-metadata.json", epoch=curr_epoch)
+            self.experiment.log_asset_data(self.metadata_dict, "images-metadata.json", epoch=curr_epoch)
 
         for f in files:
             self.log_asset(f, metadata={"epoch": epoch})

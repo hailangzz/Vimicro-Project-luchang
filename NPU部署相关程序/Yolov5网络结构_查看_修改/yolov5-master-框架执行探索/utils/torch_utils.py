@@ -63,9 +63,9 @@ def smart_DDP(model):
 
 
 def reshape_classifier_output(model, n=1000):
-    # Update a TorchVision classification model to class count 'n' if required
+    # Update a TorchVision classification models to class count 'n' if required
     from models.common import Classify
-    name, m = list((model.model if hasattr(model, 'model') else model).named_children())[-1]  # last module
+    name, m = list((model.model if hasattr(model, 'models') else model).named_children())[-1]  # last module
     if isinstance(m, Classify):  # YOLOv5 Classify() head
         if m.linear.out_features != n:
             m.linear = nn.Linear(m.linear.in_features, n)
@@ -199,12 +199,12 @@ def profile(input, ops, n=10, device=None):
 
 
 def is_parallel(model):
-    # Returns True if model is of type DP or DDP
+    # Returns True if models is of type DP or DDP
     return type(model) in (nn.parallel.DataParallel, nn.parallel.DistributedDataParallel)
 
 
 def de_parallel(model):
-    # De-parallelize a model: returns single-GPU model if model is of type DP or DDP
+    # De-parallelize a models: returns single-GPU models if models is of type DP or DDP
     return model.module if is_parallel(model) else model
 
 
@@ -226,7 +226,7 @@ def find_modules(model, mclass=nn.Conv2d):
 
 
 def sparsity(model):
-    # Return global model sparsity
+    # Return global models sparsity
     a, b = 0, 0
     for p in model.parameters():
         a += p.numel()
@@ -235,7 +235,7 @@ def sparsity(model):
 
 
 def prune(model, amount=0.3):
-    # Prune model to requested global sparsity
+    # Prune models to requested global sparsity
     import torch.nn.utils.prune as prune
     for name, m in model.named_modules():
         if isinstance(m, nn.Conv2d):
@@ -282,7 +282,7 @@ def model_info(model, verbose=False, imgsz=640):
     try:  # FLOPs
         p = next(model.parameters())
         stride = max(int(model.stride.max()), 32) if hasattr(model, 'stride') else 32  # max stride
-        im = torch.empty((1, p.shape[1], stride, stride), device=p.device)  # input image in BCHW format
+        im = torch.empty((1, p.shape[1], stride, stride), device=p.device)  # input images in BCHW format
         flops = thop.profile(deepcopy(model), inputs=(im,), verbose=False)[0] / 1E9 * 2  # stride GFLOPs
         imgsz = imgsz if isinstance(imgsz, list) else [imgsz, imgsz]  # expand if int/float
         fs = f', {flops * imgsz[0] / stride * imgsz[1] / stride:.1f} GFLOPs'  # 640x640 GFLOPs
@@ -394,7 +394,7 @@ class EarlyStopping:
         stop = delta >= self.patience  # stop training if patience exceeded
         if stop:
             LOGGER.info(f'Stopping training early as no improvement observed in last {self.patience} epochs. '
-                        f'Best results observed at epoch {self.best_epoch}, best model saved as best.pt.\n'
+                        f'Best results observed at epoch {self.best_epoch}, best models saved as best.pt.\n'
                         f'To update EarlyStopping(patience={self.patience}) pass a new patience value, '
                         f'i.e. `python train.py --patience 300` or use `--patience 0` to disable EarlyStopping.')
         return stop
@@ -402,7 +402,7 @@ class EarlyStopping:
 
 class ModelEMA:
     """ Updated Exponential Moving Average (EMA) from https://github.com/rwightman/pytorch-image-models
-    Keeps a moving average of everything in the model state_dict (parameters and buffers)
+    Keeps a moving average of everything in the models state_dict (parameters and buffers)
     For EMA details see https://www.tensorflow.org/api_docs/python/tf/train/ExponentialMovingAverage
     """
 
@@ -419,12 +419,12 @@ class ModelEMA:
         self.updates += 1
         d = self.decay(self.updates)
 
-        msd = de_parallel(model).state_dict()  # model state_dict
+        msd = de_parallel(model).state_dict()  # models state_dict
         for k, v in self.ema.state_dict().items():
             if v.dtype.is_floating_point:  # true for FP16 and FP32
                 v *= d
                 v += (1 - d) * msd[k].detach()
-        # assert v.dtype == msd[k].dtype == torch.float32, f'{k}: EMA {v.dtype} and model {msd[k].dtype} must be FP32'
+        # assert v.dtype == msd[k].dtype == torch.float32, f'{k}: EMA {v.dtype} and models {msd[k].dtype} must be FP32'
 
     def update_attr(self, model, include=(), exclude=('process_group', 'reducer')):
         # Update EMA attributes

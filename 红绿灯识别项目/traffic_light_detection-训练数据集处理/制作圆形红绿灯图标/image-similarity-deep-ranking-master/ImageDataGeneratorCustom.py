@@ -1,4 +1,4 @@
-"""Fairly basic set of tools for real-time data augmentation on image data.
+"""Fairly basic set of tools for real-time data augmentation on images data.
 Can easily be extended to include new transformations,
 new preprocessing methods, etc...
 """
@@ -26,7 +26,7 @@ except ImportError:
 
 def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
                     fill_mode='nearest', cval=0.):
-    """Performs a random rotation of a Numpy image tensor.
+    """Performs a random rotation of a Numpy images tensor.
     # Arguments
         x: Input tensor. Must be 3D.
         rg: Rotation range, in degrees.
@@ -39,7 +39,7 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
     # Returns
-        Rotated Numpy image tensor.
+        Rotated Numpy images tensor.
     """
     theta = np.pi / 180 * np.random.uniform(-rg, rg)
     rotation_matrix = np.array([[np.cos(theta), -np.sin(theta), 0],
@@ -54,7 +54,7 @@ def random_rotation(x, rg, row_axis=1, col_axis=2, channel_axis=0,
 
 def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
                  fill_mode='nearest', cval=0.):
-    """Performs a random spatial shift of a Numpy image tensor.
+    """Performs a random spatial shift of a Numpy images tensor.
     # Arguments
         x: Input tensor. Must be 3D.
         wrg: Width shift range, as a float fraction of the width.
@@ -68,7 +68,7 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
     # Returns
-        Shifted Numpy image tensor.
+        Shifted Numpy images tensor.
     """
     h, w = x.shape[row_axis], x.shape[col_axis]
     tx = np.random.uniform(-hrg, hrg) * h
@@ -84,7 +84,7 @@ def random_shift(x, wrg, hrg, row_axis=1, col_axis=2, channel_axis=0,
 
 def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
                  fill_mode='nearest', cval=0.):
-    """Performs a random spatial shear of a Numpy image tensor.
+    """Performs a random spatial shear of a Numpy images tensor.
     # Arguments
         x: Input tensor. Must be 3D.
         intensity: Transformation intensity.
@@ -97,7 +97,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
     # Returns
-        Sheared Numpy image tensor.
+        Sheared Numpy images tensor.
     """
     shear = np.random.uniform(-intensity, intensity)
     shear_matrix = np.array([[1, -np.sin(shear), 0],
@@ -112,7 +112,7 @@ def random_shear(x, intensity, row_axis=1, col_axis=2, channel_axis=0,
 
 def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
                 fill_mode='nearest', cval=0.):
-    """Performs a random spatial zoom of a Numpy image tensor.
+    """Performs a random spatial zoom of a Numpy images tensor.
     # Arguments
         x: Input tensor. Must be 3D.
         zoom_range: Tuple of floats; zoom range for width and height.
@@ -125,7 +125,7 @@ def random_zoom(x, zoom_range, row_axis=1, col_axis=2, channel_axis=0,
         cval: Value used for points outside the boundaries
             of the input if `mode='constant'`.
     # Returns
-        Zoomed Numpy image tensor.
+        Zoomed Numpy images tensor.
     # Raises
         ValueError: if `zoom_range` isn't a tuple.
     """
@@ -171,9 +171,9 @@ def apply_transform(x,
                     channel_axis=0,
                     fill_mode='nearest',
                     cval=0.):
-    """Apply the image transformation specified by a matrix.
+    """Apply the images transformation specified by a matrix.
     # Arguments
-        x: 2D numpy array, single image.
+        x: 2D numpy array, single images.
         transform_matrix: Numpy array specifying the geometric transformation.
         channel_axis: Index of axis for channels in the input tensor.
         fill_mode: Points outside the boundaries of the input
@@ -211,7 +211,7 @@ def array_to_img(x, data_format=None, scale=True):
     # Arguments
         x: Input Numpy array.
         data_format: Image data format.
-        scale: Whether to rescale image values
+        scale: Whether to rescale images values
             to be within [0, 255].
     # Returns
         A PIL Image instance.
@@ -224,7 +224,7 @@ def array_to_img(x, data_format=None, scale=True):
                           'The use of `array_to_img` requires PIL.')
     x = np.asarray(x, dtype=K.floatx())
     if x.ndim != 3:
-        raise ValueError('Expected image array to have rank 3 (single image). '
+        raise ValueError('Expected images array to have rank 3 (single images). '
                          'Got array with shape:', x.shape)
 
     if data_format is None:
@@ -234,7 +234,7 @@ def array_to_img(x, data_format=None, scale=True):
 
     # Original Numpy array x has format (height, width, channel)
     # or (channel, height, width)
-    # but target PIL image has format (width, height, channel)
+    # but target PIL images has format (width, height, channel)
     if data_format == 'channels_first':
         x = x.transpose(1, 2, 0)
     if scale:
@@ -269,7 +269,7 @@ def img_to_array(img, data_format=None):
         raise ValueError('Unknown data_format: ', data_format)
     # Numpy array x has format (height, width, channel)
     # or (channel, height, width)
-    # but original PIL image has format (width, height, channel)
+    # but original PIL images has format (width, height, channel)
     x = np.asarray(img, dtype=K.floatx())
     if len(x.shape) == 3:
         if data_format == 'channels_first':
@@ -280,15 +280,15 @@ def img_to_array(img, data_format=None):
         else:
             x = x.reshape((x.shape[0], x.shape[1], 1))
     else:
-        raise ValueError('Unsupported image shape: ', x.shape)
+        raise ValueError('Unsupported images shape: ', x.shape)
     return x
 
 
 def load_img(path, grayscale=False, target_size=None):
-    """Loads an image into PIL format.
+    """Loads an images into PIL format.
     # Arguments
-        path: Path to image file
-        grayscale: Boolean, whether to load the image as grayscale.
+        path: Path to images file
+        grayscale: Boolean, whether to load the images as grayscale.
         target_size: Either `None` (default to original size)
             or tuple of ints `(img_height, img_width)`.
     # Returns
@@ -321,7 +321,7 @@ def list_pictures(directory, ext='jpg|jpeg|bmp|png|ppm'):
 
 class ImageDataGeneratorCustom(object):
     
-    """Generate minibatches of image data with real-time data augmentation.
+    """Generate minibatches of images data with real-time data augmentation.
     # Arguments
         featurewise_center: set input mean to 0 over the dataset.
         samplewise_center: set each sample mean to 0.
@@ -351,7 +351,7 @@ class ImageDataGeneratorCustom(object):
         preprocessing_function: function that will be implied on each input.
             The function will run before any other modification on it.
             The function should take one argument:
-            one image (Numpy tensor with rank 3),
+            one images (Numpy tensor with rank 3),
             and should output a Numpy tensor with the same shape.
         data_format: 'channels_first' or 'channels_last'. In 'channels_first' mode, the channels dimension
             (the depth) is at index 1, in 'channels_last' mode it is at index 3.
@@ -472,7 +472,7 @@ class ImageDataGeneratorCustom(object):
             x = self.preprocessing_function(x)
         if self.rescale:
             x *= self.rescale
-        # x is a single image, so it doesn't have image number at index 0
+        # x is a single images, so it doesn't have images number at index 0
         img_channel_axis = self.channel_axis - 1
         if self.samplewise_center:
             x -= np.mean(x, axis=img_channel_axis, keepdims=True)
@@ -508,14 +508,14 @@ class ImageDataGeneratorCustom(object):
         return x
 
     def random_transform(self, x, seed=None):
-        """Randomly augment a single image tensor.
+        """Randomly augment a single images tensor.
         # Arguments
-            x: 3D tensor, single image.
+            x: 3D tensor, single images.
             seed: random seed.
         # Returns
             A randomly transformed version of the input (same shape).
         """
-        # x is a single image, so it doesn't have image number at index 0
+        # x is a single images, so it doesn't have images number at index 0
         img_row_axis = self.row_axis - 1
         img_col_axis = self.col_axis - 1
         img_channel_axis = self.channel_axis - 1
@@ -660,7 +660,7 @@ class ImageDataGeneratorCustom(object):
 
 
 class Iterator(object):
-    """Abstract base class for image data iterators.
+    """Abstract base class for images data iterators.
     # Arguments
         n: Integer, total number of samples in the dataset to loop over.
         batch_size: Integer, size of a batch.
@@ -1018,7 +1018,7 @@ class DirectoryIterator(Iterator):
         # so it can be done in parallel
         batch_x = np.zeros((current_batch_size,) + self.image_shape, dtype=K.floatx())
         grayscale = self.color_mode == 'grayscale'
-        # build batch of image data
+        # build batch of images data
         for i, j in enumerate(index_array):
             fname = self.filenames[j]
             img = load_img(os.path.join(self.directory, fname),

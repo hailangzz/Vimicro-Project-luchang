@@ -112,7 +112,7 @@ def check_anchors(dataset, model, thr=4.0, imgsz=640):
             m.anchor_grid[:] = new_anchors.clone().view_as(m.anchor_grid)  # for demo
             m.anchors[:] = new_anchors.clone().view_as(m.anchors) / m.stride.to(m.anchors.device).view(-1, 1, 1)  # loss
             check_anchor_order(m)
-            print('New anchors saved to model. Update model *.yaml to use these anchors in the future.')
+            print('New anchors saved to models. Update models *.yaml to use these anchors in the future.')
         else:
             print('Original anchors better than new anchors. Proceeding with original anchors.')
     print('')  # newline
@@ -175,7 +175,7 @@ def labels_to_class_weights(labels, nc=80):
     weights = np.bincount(classes, minlength=nc)  # occurences per class
 
     # Prepend gridpoint count (for uCE trianing)
-    # gpi = ((320 / 32 * np.array([1, 2, 4])) ** 2 * 3).sum()  # gridpoints per image
+    # gpi = ((320 / 32 * np.array([1, 2, 4])) ** 2 * 3).sum()  # gridpoints per images
     # weights = np.hstack([gpi * len(labels)  - weights.sum() * 9, weights * 9]) ** 0.5  # prepend gridpoints to start
 
     weights[weights == 0] = 1  # replace empty bins with 1
@@ -185,12 +185,12 @@ def labels_to_class_weights(labels, nc=80):
 
 
 def labels_to_image_weights(labels, nc=80, class_weights=np.ones(80)):
-    # Produces image weights based on class mAPs
+    # Produces images weights based on class mAPs
     n = len(labels)
     class_counts = np.array(
         [np.bincount(labels[i][:, 0].astype(np.int), minlength=nc) for i in range(n)])
     image_weights = (class_weights.reshape(1, nc) * class_counts).sum(1)
-    # index = random.choices(range(n), weights=image_weights, k=1)  # weight image sample
+    # index = random.choices(range(n), weights=image_weights, k=1)  # weight images sample
     return image_weights
 
 
@@ -245,7 +245,7 @@ def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
 
 
 def clip_coords(boxes, img_shape):
-    # Clip bounding xyxy bounding boxes to image shape (height, width)
+    # Clip bounding xyxy bounding boxes to images shape (height, width)
     boxes[:, 0].clamp_(0, img_shape[1])  # x1
     boxes[:, 1].clamp_(0, img_shape[0])  # y1
     boxes[:, 2].clamp_(0, img_shape[1])  # x2
@@ -484,7 +484,7 @@ class BCEBlurWithLogitsLoss(nn.Module):
         return loss.mean()
 
 
-def compute_loss(p, targets, model):  # predictions, targets, model
+def compute_loss(p, targets, model):  # predictions, targets, models
     device = targets.device
     lcls, lbox, lobj = torch.zeros(1, device=device), torch.zeros(1, device=device), torch.zeros(1, device=device)
     tcls, tbox, indices, anchors = build_targets(p, targets, model)  # targets
@@ -507,7 +507,7 @@ def compute_loss(p, targets, model):  # predictions, targets, model
     np = len(p)  # number of outputs
     balance = [4.0, 1.0, 0.4] if np == 3 else [4.0, 1.0, 0.4, 0.1]  # P3-5 or P3-6
     for i, pi in enumerate(p):  # layer index, layer predictions
-        b, a, gj, gi = indices[i]  # image, anchor, gridy, gridx
+        b, a, gj, gi = indices[i]  # images, anchor, gridy, gridx
         tobj = torch.zeros_like(pi[..., 0], device=device)  # target obj
 
         n = b.shape[0]  # number of targets
@@ -548,7 +548,7 @@ def compute_loss(p, targets, model):  # predictions, targets, model
 
 
 def build_targets(p, targets, model):
-    # Build targets for compute_loss(), input targets(image,class,x,y,w,h)
+    # Build targets for compute_loss(), input targets(images,class,x,y,w,h)
     det = model.module.model[-1] if is_parallel(model) else model.model[-1]  # Detect() module
     na, nt = det.na, targets.shape[0]  # number of anchors, targets
     tcls, tbox, indices, anch = [], [], [], []
@@ -572,7 +572,7 @@ def build_targets(p, targets, model):
             # Matches
             r = t[:, :, 4:6] / anchors[:, None]  # wh ratio
             j = torch.max(r, 1. / r).max(2)[0] < model.hyp['anchor_t']  # compare
-            # j = wh_iou(anchors, t[:, 4:6]) > model.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
+            # j = wh_iou(anchors, t[:, 4:6]) > models.hyp['iou_t']  # iou(3,n)=wh_iou(anchors(3,2), gwh(n,2))
             t = t[j]  # filter
 
             # Offsets
@@ -588,7 +588,7 @@ def build_targets(p, targets, model):
             offsets = 0
 
         # Define
-        b, c = t[:, :2].long().T  # image, class
+        b, c = t[:, :2].long().T  # images, class
         gxy = t[:, 2:4]  # grid xy
         gwh = t[:, 4:6]  # grid wh
         gij = (gxy - offsets).long()
@@ -596,7 +596,7 @@ def build_targets(p, targets, model):
 
         # Append
         a = t[:, 6].long()  # anchor indices
-        indices.append((b, a, gj, gi))  # image, anchor, grid indices
+        indices.append((b, a, gj, gi))  # images, anchor, grid indices
         tbox.append(torch.cat((gxy - gij, gwh), 1))  # box
         anch.append(anchors[a])  # anchors
         tcls.append(c)  # class
@@ -617,19 +617,19 @@ def non_max_suppression(prediction, conf_thres=0.1, iou_thres=0.6, merge=False, 
     # Settings
     # (pixels) minimum and maximum box width and height
     min_wh, max_wh = 2, 4096
-    max_det = 300  # maximum number of detections per image
+    max_det = 300  # maximum number of detections per images
     time_limit = 10.0  # seconds to quit after
     redundant = True  # require redundant detections
     multi_label = nc > 1  # multiple labels per box (adds 0.5ms/img)
 
     t = time.time()
     output = [None] * prediction.shape[0]
-    for xi, x in enumerate(prediction):  # image index, image demo
+    for xi, x in enumerate(prediction):  # images index, images demo
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
         x = x[xc[xi]]  # confidence
 
-        # If none remain process next image
+        # If none remain process next images
         if not x.shape[0]:
             continue
 
@@ -656,7 +656,7 @@ def non_max_suppression(prediction, conf_thres=0.1, iou_thres=0.6, merge=False, 
         # if not torch.isfinite(x).all():
         #     x = x[torch.isfinite(x).all(1)]
 
-        # If none remain process next image
+        # If none remain process next images
         n = x.shape[0]  # number of boxes
         if not n:
             continue
@@ -695,8 +695,8 @@ def strip_optimizer(f='weights/best.pt', s=''):  # from utils.general import *; 
     x['optimizer'] = None
     x['training_results'] = None
     x['epoch'] = -1
-    x['model'].half()  # to FP16
-    for p in x['model'].parameters():
+    x['models'].half()  # to FP16
+    for p in x['models'].parameters():
         p.requires_grad = False
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1E6  # filesize
@@ -761,7 +761,7 @@ def coco_single_class_labels(path='../coco/labels/train2014/', label_class=43):
         if any(i):
             img_file = file.replace('labels', 'images').replace('txt', 'jpg')
             labels[:, 0] = 0  # reset class to 0
-            with open('new/images.txt', 'a') as f:  # add image to dataset list
+            with open('new/images.txt', 'a') as f:  # add images to dataset list
                 f.write(img_file + '\n')
             with open('new/labels/' + Path(file).name, 'a') as f:  # write label
                 for l in labels[i]:
@@ -776,7 +776,7 @@ def kmean_anchors(path='./data/coco128.yaml', n=9, img_size=640, thr=4.0, gen=10
         Arguments:
             path: path to dataset *.yaml, or a loaded dataset
             n: number of anchors
-            img_size: image size used for training
+            img_size: images size used for training
             thr: anchor-label wh ratio threshold hyperparameter hyp['anchor_t'] used for training, default=4.0
             gen: generations to evolve anchors using genetic algorithm
 
@@ -812,7 +812,7 @@ def kmean_anchors(path='./data/coco128.yaml', n=9, img_size=640, thr=4.0, gen=10
 
     if isinstance(path, str):  # *.yaml file
         with open(path) as f:
-            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
         from utils.datasets import LoadImagesAndLabels
         dataset = LoadImagesAndLabels(data_dict['train'], augment=True, rect=True)
     else:
@@ -906,7 +906,7 @@ def print_mutation(hyp, results, yaml_file='hyp_evolved.yaml', bucket=''):
 def apply_classifier(x, model, img, im0):
     # applies a second stage classifier to yolo outputs
     im0 = [im0] if isinstance(im0, np.ndarray) else im0
-    for i, d in enumerate(x):  # per image
+    for i, d in enumerate(x):  # per images
         if d is not None and len(d):
             d = d.clone()
 
@@ -948,7 +948,7 @@ def fitness(x):
 
 
 def output_to_target(output, width, height):
-    # Convert model rec_result to target format [batch_id, class_id, x, y, w, h, conf]
+    # Convert models rec_result to target format [batch_id, class_id, x, y, w, h, conf]
     if isinstance(output, torch.Tensor):
         output = output.cpu().numpy()
 
@@ -1002,7 +1002,7 @@ def butter_lowpass_filtfilt(data, cutoff=1500, fs=50000, order=5):
 
 
 def plot_one_box(x, img, color=None, label=None, line_thickness=None):
-    # Plots one bounding box on image img
+    # Plots one bounding box on images img
     tl = line_thickness or round(
         0.002 * (img.shape[0] + img.shape[1]) / 2) + 1  # line/font thickness
     color = color or [random.randint(0, 255) for _ in range(3)]
@@ -1107,7 +1107,7 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
                     plot_one_box(box, mosaic, label=label,
                                  color=color, line_thickness=tl)
 
-        # Draw image filename labels
+        # Draw images filename labels
         if paths is not None:
             label = os.path.basename(paths[i])[:40]  # trim to 40 char
             t_size = cv2.getTextSize(
@@ -1179,10 +1179,10 @@ def increment_path(path, exist_ok=False, sep='', mkdir=False):
         dir.mkdir(parents=True, exist_ok=True)  # make directory
     return path  # 返回runs/train/exp2
 
-def save_one_box(xyxy, im, file='image.jpg', gain=1.02, pad=10, square=False, BGR=False, save=True):
+def save_one_box(xyxy, im, file='images.jpg', gain=1.02, pad=10, square=False, BGR=False, save=True):
     """用在detect.py文件中  由opt的save-crop参数控制执不执行
     将预测到的目标从原图中扣出来 剪切好 并保存 会在runs/detect/expn下生成crops文件，将剪切的图片保存在里面
-    Save image crop as {file} with crop size multiple {gain} and {pad} pixels. Save and/or return crop
+    Save images crop as {file} with crop size multiple {gain} and {pad} pixels. Save and/or return crop
     :params xyxy: 预测到的目标框信息 list 4个tensor x1 y1 x2 y2 左上角 + 右下角
     :params im: 原图片 需要裁剪的框从这个原图上裁剪  nparray  (1080, 810, 3)
     :params file: runs\detect\exp\crops\dog\bus.jpg
@@ -1317,7 +1317,7 @@ def check_imshow():
     检查当前环境是否可以使用opencv.imshow显示图片
     主要有两点限制: Docker环境 + Google Colab环境
     """
-    # Check if environment supports image displays
+    # Check if environment supports images displays
     try:
         # 检查当前环境是否是一个Docker环境 cv2.imshow()不能再docker环境中使用
         assert not is_docker(), 'cv2.imshow() is disabled in Docker environments'
@@ -1330,7 +1330,7 @@ def check_imshow():
         cv2.waitKey(1)
         return True
     except Exception as e:
-        print(f'WARNING: Environment does not support cv2.imshow() or PIL Image.show() image displays\n{e}')
+        print(f'WARNING: Environment does not support cv2.imshow() or PIL Image.show() images displays\n{e}')
         return False
 
 def colorstr(*input):

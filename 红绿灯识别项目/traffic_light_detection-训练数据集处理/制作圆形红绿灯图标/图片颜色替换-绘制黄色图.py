@@ -18,9 +18,9 @@ def creat_yellow_mask_image(green_image_path,red_image_path):
         red_image[:,:,1]=green_image[:,:,1]
         # square3 = (square1+square2)/2
         # print(square3.shape)
-        # image=Image.fromarray(np.uint8(square1))
+        # images=Image.fromarray(np.uint8(square1))
         image=Image.fromarray(red_image)
-        # image.show()
+        # images.show()
         save_image_path = os.path.join(save_path,image_name)
         image.save(save_image_path)
 

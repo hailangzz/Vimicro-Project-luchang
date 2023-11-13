@@ -83,7 +83,7 @@ class Annotator:
         self.lw = line_width or max(round(sum(im.shape) / 2 * 0.003), 2)  # line width
 
     def box_label(self, box, label='', color=(128, 128, 128), txt_color=(255, 255, 255)):
-        # Add one xyxy box to image with label
+        # Add one xyxy box to images with label
         if self.pil or not is_ascii(label):
             self.draw.rectangle(box, width=self.lw, outline=color)  # box
             if label:
@@ -108,16 +108,16 @@ class Annotator:
                             thickness=tf, lineType=cv2.LINE_AA)
 
     def rectangle(self, xy, fill=None, outline=None, width=1):
-        # Add rectangle to image (PIL-only)
+        # Add rectangle to images (PIL-only)
         self.draw.rectangle(xy, fill, outline, width)
 
     def text(self, xy, text, txt_color=(255, 255, 255)):
-        # Add text to image (PIL-only)
+        # Add text to images (PIL-only)
         w, h = self.font.getsize(text)  # text width, height
         self.draw.text((xy[0], xy[1] - h + 1), text, fill=txt_color, font=self.font)
 
     def result(self):
-        # Return annotated image as array
+        # Return annotated images as array
         return np.asarray(self.im)
 
 
@@ -125,7 +125,7 @@ def feature_visualization(x, module_type, stage, n=32, save_dir=Path('runs/detec
     """
     x:              Features to be visualized
     module_type:    Module type
-    stage:          Module stage within model
+    stage:          Module stage within models
     n:              Maximum number of feature maps to plot
     save_dir:       Directory to save results
     """
@@ -172,7 +172,7 @@ def butter_lowpass_filtfilt(data, cutoff=1500, fs=50000, order=5):
 
 
 def output_to_target(output):
-    # Convert model output to target format [batch_id, class_id, x, y, w, h, conf]
+    # Convert models output to target format [batch_id, class_id, x, y, w, h, conf]
     targets = []
     for i, o in enumerate(output):
         for *box, conf, cls in o.cpu().numpy():
@@ -181,7 +181,7 @@ def output_to_target(output):
 
 
 def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max_size=1920, max_subplots=16):
-    # Plot image grid with labels
+    # Plot images grid with labels
     if isinstance(images, torch.Tensor):
         images = images.cpu().float().numpy()
     if isinstance(targets, torch.Tensor):
@@ -217,7 +217,7 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
         if paths:
             annotator.text((x + 5, y + 5 + h), text=Path(paths[i]).name[:40], txt_color=(220, 220, 220))  # filenames
         if len(targets) > 0:
-            ti = targets[targets[:, 0] == i]  # image targets
+            ti = targets[targets[:, 0] == i]  # images targets
             boxes = xywh2xyxy(ti[:, 2:6]).T
             classes = ti[:, 1].astype('int')
             labels = ti.shape[1] == 6  # labels if no conf column
@@ -227,7 +227,7 @@ def plot_images(images, targets, paths=None, fname='images.jpg', names=None, max
                 if boxes.max() <= 1.01:  # if normalized with tolerance 0.01
                     boxes[[0, 2]] *= w  # scale to pixels
                     boxes[[1, 3]] *= h
-                elif scale < 1:  # absolute coords need scale if image scales
+                elif scale < 1:  # absolute coords need scale if images scales
                     boxes *= scale
             boxes[[0, 2]] += x
             boxes[[1, 3]] += y
@@ -424,7 +424,7 @@ def plot_results(file='path/to/results.csv', dir=''):
 
 
 def profile_idetection(start=0, stop=0, labels=(), save_dir=''):
-    # Plot iDetection '*.txt' per-image logs. from utils.plots import *; profile_idetection()
+    # Plot iDetection '*.txt' per-images logs. from utils.plots import *; profile_idetection()
     ax = plt.subplots(2, 4, figsize=(12, 6), tight_layout=True)[1].ravel()
     s = ['Images', 'Free Storage (GB)', 'RAM Usage (GB)', 'Battery', 'dt_raw (ms)', 'dt_smooth (ms)', 'real-world FPS']
     files = list(Path(save_dir).glob('frames*.txt'))
@@ -454,8 +454,8 @@ def profile_idetection(start=0, stop=0, labels=(), save_dir=''):
     plt.savefig(Path(save_dir) / 'idetection_profile.png', dpi=200)
 
 
-def save_one_box(xyxy, im, file='image.jpg', gain=1.02, pad=10, square=False, BGR=False, save=True):
-    # Save image crop as {file} with crop size multiple {gain} and {pad} pixels. Save and/or return crop
+def save_one_box(xyxy, im, file='images.jpg', gain=1.02, pad=10, square=False, BGR=False, save=True):
+    # Save images crop as {file} with crop size multiple {gain} and {pad} pixels. Save and/or return crop
     xyxy = torch.tensor(xyxy).view(-1, 4)
     b = xyxy2xywh(xyxy)  # boxes
     if square:

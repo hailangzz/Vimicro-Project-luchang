@@ -5,13 +5,13 @@ from paddle.vision.transforms import Compose, Resize, CenterCrop, Normalize
 from onnxruntime.quantization import CalibrationDataReader, QuantFormat, quantize_static, QuantType, CalibrationMethod
 from onnxruntime import InferenceSession, get_available_providers
 
-# Ä£ĞÍÂ·¾¶
+# æ¨¡å‹è·¯å¾„
 model_fp32 = 'models/yolop-640-640.onnx'
 model_quant_static = 'models/yolop-640-640_quant_static.onnx'
 
-# Êı¾İÔ¤´¦Àí
+# æ•°æ®é¢„å¤„ç†
 '''
-    Ëõ·Å -> ÖĞĞÄ²ÃÇĞ -> ÀàĞÍ×ª»» -> ×ªÖÃ -> ¹éÒ»»¯ -> Ìí¼ÓÎ¬¶È
+    ç¼©æ”¾ -> ä¸­å¿ƒè£åˆ‡ -> ç±»å‹è½¬æ¢ -> è½¬ç½® -> å½’ä¸€åŒ– -> æ·»åŠ ç»´åº¦
 '''
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
@@ -25,9 +25,9 @@ val_transforms = Compose(
     ]
 )
 
-# ÓÃÓÚĞ£×¼µÄÍ¼ÏñÊı¾İ
+# ç”¨äºæ ¡å‡†çš„å›¾åƒæ•°æ®
 '''
-    ¶ÁÈ¡Í¼Ïñ -> Ô¤´¦Àí -> ×é³ÉÊı¾İ×Öµä
+    è¯»å–å›¾åƒ -> é¢„å¤„ç† -> ç»„æˆæ•°æ®å­—å…¸
 '''
 img_dir = 'F:\AiTotalDatabase\ADAS_test_images\origin_images'
 img_num = 100
@@ -38,7 +38,7 @@ datas = [
 ]
 
 
-# Êı¾İÅú´Î¶ÁÈ¡Æ÷
+# æ•°æ®æ‰¹æ¬¡è¯»å–å™¨
 def batch_reader(datas, batch_size):
     _datas = []
     length = len(datas)
@@ -56,16 +56,16 @@ def batch_reader(datas, batch_size):
             yield {'inputs': np.concatenate(_datas, 0)}
 
 
-# ¹¹½¨Ğ£×¼Êı¾İ¶ÁÈ¡Æ÷
+# æ„å»ºæ ¡å‡†æ•°æ®è¯»å–å™¨
 '''
-    ÊµÖÊÊÇÒ»¸öµü´úÆ÷
-    get_next ·½·¨·µ»ØÒ»¸öÈçÏÂÑùÊ½µÄ×Öµä
+    å®è´¨æ˜¯ä¸€ä¸ªè¿­ä»£å™¨
+    get_next æ–¹æ³•è¿”å›ä¸€ä¸ªå¦‚ä¸‹æ ·å¼çš„å­—å…¸
     {
-        ÊäÈë 1: Êı¾İ 1, 
+        è¾“å…¥ 1: æ•°æ® 1, 
         ...
-        ÊäÈë n: Êı¾İ n
+        è¾“å…¥ n: æ•°æ® n
     }
-    ¼ÇÂ¼ÁËÄ£ĞÍµÄ¸÷¸öÊäÈëºÍÆä¶ÔÓ¦µÄ¾­¹ıÔ¤´¦ÀíºóµÄÊı¾İ
+    è®°å½•äº†æ¨¡å‹çš„å„ä¸ªè¾“å…¥å’Œå…¶å¯¹åº”çš„ç»è¿‡é¢„å¤„ç†åçš„æ•°æ®
 '''
 
 
@@ -77,17 +77,17 @@ class DataReader(CalibrationDataReader):
         return next(self.datas, None)
 
 
-# ÊµÀı»¯Ò»¸öĞ£×¼Êı¾İ¶ÁÈ¡Æ÷
+# å®ä¾‹åŒ–ä¸€ä¸ªæ ¡å‡†æ•°æ®è¯»å–å™¨
 data_reader = DataReader(datas, 1)
 
-# ¾²Ì¬Á¿»¯
+# é™æ€é‡åŒ–
 quantize_static(
-    model_input=model_fp32,  # ÊäÈëÄ£ĞÍ
-    model_output=model_quant_static,  # Êä³öÄ£ĞÍ
-    calibration_data_reader=data_reader,  # Ğ£×¼Êı¾İ¶ÁÈ¡Æ÷
-    quant_format=QuantFormat.QDQ,  # Á¿»¯¸ñÊ½ QDQ / QOperator
-    activation_type=QuantType.QInt8,  # ¼¤»îÀàĞÍ Int8 / UInt8
-    weight_type=QuantType.QInt8,  # ²ÎÊıÀàĞÍ Int8 / UInt8
-    calibrate_method=CalibrationMethod.MinMax,  # Êı¾İĞ£×¼·½·¨ MinMax / Entropy / Percentile
-    optimize_model=False  # ÊÇ·ñÓÅ»¯Ä£ĞÍ
+    model_input=model_fp32,  # è¾“å…¥æ¨¡å‹
+    model_output=model_quant_static,  # è¾“å‡ºæ¨¡å‹
+    calibration_data_reader=data_reader,  # æ ¡å‡†æ•°æ®è¯»å–å™¨
+    quant_format=QuantFormat.QDQ,  # é‡åŒ–æ ¼å¼ QDQ / QOperator
+    activation_type=QuantType.QInt8,  # æ¿€æ´»ç±»å‹ Int8 / UInt8
+    weight_type=QuantType.QInt8,  # å‚æ•°ç±»å‹ Int8 / UInt8
+    calibrate_method=CalibrationMethod.MinMax,  # æ•°æ®æ ¡å‡†æ–¹æ³• MinMax / Entropy / Percentile
+    optimize_model=False  # æ˜¯å¦ä¼˜åŒ–æ¨¡å‹
         )

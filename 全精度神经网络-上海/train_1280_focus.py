@@ -1,6 +1,6 @@
 
 """
-Train a YOLOv5 model on a custom dataset.
+Train a YOLOv5 models on a custom dataset.
 
 Models and datasets download automatically from the latest YOLOv5 release.
 Models: https://github.com/ultralytics/yolov5/tree/master/models
@@ -120,9 +120,9 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
         with torch_distributed_zero_first(LOCAL_RANK):
             weights = attempt_download(weights)  # download if not found locally
         ckpt = torch.load(weights, map_location='cpu')  # load checkpoint to CPU to avoid CUDA memory leak
-        model = Model(cfg or ckpt['model'].yaml, ch=1, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
+        model = Model(cfg or ckpt['models'].yaml, ch=1, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
         exclude = ['anchor'] if (cfg or hyp.get('anchors')) and not resume else []  # exclude keys
-        csd = ckpt['model'].float().state_dict()  # checkpoint state_dict as FP32
+        csd = ckpt['models'].float().state_dict()  # checkpoint state_dict as FP32
         csd = intersect_dicts(csd, model.state_dict(), exclude=exclude)  # intersect
         model.load_state_dict(csd, strict=False)  # load
         LOGGER.info(f'Transferred {len(csd)}/{len(model.state_dict())} items from {weights}')  # report
@@ -130,7 +130,7 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
         model = Model(cfg, ch=1, nc=nc, anchors=hyp.get('anchors')).to(device)  # create
 
     # Freeze
-    freeze = [f'model.{x}.' for x in (freeze if len(freeze) > 1 else range(freeze[0]))]  # layers to freeze
+    freeze = [f'models.{x}.' for x in (freeze if len(freeze) > 1 else range(freeze[0]))]  # layers to freeze
     for k, v in model.named_parameters():
         v.requires_grad = True  # train all layers
         if any(x in k for x in freeze):
@@ -258,7 +258,7 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
             labels = np.concatenate(dataset.labels, 0)
             # c = torch.tensor(labels[:, 0])  # classes
             # cf = torch.bincount(c.long(), minlength=nc) + 1.  # frequency
-            # model._initialize_biases(cf.to(device))
+            # models._initialize_biases(cf.to(device))
             if plots:
                 plot_labels(labels, names, save_dir)
 
@@ -277,10 +277,10 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
     nl = de_parallel(model).model[-1].nl  # number of detection layers (to scale hyps)
     hyp['box'] *= 3 / nl  # scale to layers
     hyp['cls'] *= nc / 80 * 3 / nl  # scale to classes and layers
-    hyp['obj'] *= (imgsz / 640) ** 2 * 3 / nl  # scale to image size and layers
+    hyp['obj'] *= (imgsz / 640) ** 2 * 3 / nl  # scale to images size and layers
     hyp['label_smoothing'] = opt.label_smoothing
-    model.nc = nc  # attach number of classes to model
-    model.hyp = hyp  # attach hyperparameters to model
+    model.nc = nc  # attach number of classes to models
+    model.hyp = hyp  # attach hyperparameters to models
     model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device) * nc  # attach class weights
     model.names = names
 
@@ -304,10 +304,10 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
         callbacks.run('on_train_epoch_start')
         model.train()
 
-        # Update image weights (optional, single-GPU only)
+        # Update images weights (optional, single-GPU only)
         if opt.image_weights:
             cw = model.class_weights.cpu().numpy() * (1 - maps) ** 2 / nc  # class weights
-            iw = labels_to_image_weights(dataset.labels, nc=nc, class_weights=cw)  # image weights
+            iw = labels_to_image_weights(dataset.labels, nc=nc, class_weights=cw)  # images weights
             dataset.indices = random.choices(range(dataset.n), weights=iw, k=dataset.n)  # rand weighted idx
 
         # Update mosaic border (optional)
@@ -407,11 +407,11 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
             log_vals = list(mloss) + list(results) + lr
             callbacks.run('on_fit_epoch_end', log_vals, epoch, best_fitness, fi)
 
-            # Save model
+            # Save models
             ckpt = {
                     'epoch': epoch,
                     'best_fitness': best_fitness,
-                    'model': deepcopy(de_parallel(model)).half(),
+                    'models': deepcopy(de_parallel(model)).half(),
                     'ema': deepcopy(ema.ema).half(),
                     'updates': ema.updates,
                     'optimizer': optimizer.state_dict(),
@@ -465,7 +465,7 @@ def train(hyp, opt, model_rgb2yuv,device, callbacks):  # hyp is path/to/hyp.yaml
                         verbose=True,
                         plots=plots,
                         callbacks=callbacks,
-                        compute_loss=compute_loss)  # val best model with plots
+                        compute_loss=compute_loss)  # val best models with plots
                     if is_coco:
                         callbacks.run('on_fit_epoch_end', list(mloss) + list(results) + lr, epoch, best_fitness, fi)
 
@@ -480,13 +480,13 @@ def parse_opt(known=False):
 
     parser = argparse.ArgumentParser()
 
-    """如果报错“OSError: [WinError 1455] 页面文件太小,无法完成操作�?Error loading “D:\Anaco……”，就把workers改小，也可以设置�? """  #注意一�?
+    """如果报错“OSError: [WinError 1455] 页面文件太小,无法完成操作�?Error loading “D:\Anaco……”，就把workers改小，也可以设置�? """  #注意一�?
     parser.add_argument('--weights', type=str, default='weights/yolov5s.pt', help='initial weights path')#               # 权重文件
-    parser.add_argument('--cfg', type=str, default='models/yolov5s_focus_p3.yaml', help='model.yaml path')                    # 模型文件
-    parser.add_argument('--data', type=str, default='dota_data/dota_name.yaml', help='dataset.yaml path')               # 数据集文�?    parser.add_argument('--hyp', type=str, default='data/hyps/hyp.scratch-low.yaml', help='hyperparameters path')
+    parser.add_argument('--cfg', type=str, default='models/yolov5s_focus_p3.yaml', help='models.yaml path')                    # 模型文件
+    parser.add_argument('--data', type=str, default='dota_data/dota_name.yaml', help='dataset.yaml path')               # 数据集文�?    parser.add_argument('--hyp', type=str, default='data/hyps/hyp.scratch-low.yaml', help='hyperparameters path')
     parser.add_argument('--epochs', type=int, default=150)                                                              # epoch
     parser.add_argument('--batch-size', type=int, default=64, help='total batch size for all GPUs, -1 for autobatch')   # batch size
-    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=1280, help='train, val image size (pixels)')
+    parser.add_argument('--imgsz', '--img', '--img-size', type=int, default=1280, help='train, val images size (pixels)')
     parser.add_argument('--rect', action='store_true', help='rectangular training')
     parser.add_argument('--resume', nargs='?', const=True, default='runs/exp_1280_sp3_3/best.pt', help='resume most recent training')
     parser.add_argument('--nosave', action='store_true', help='only save final checkpoint')
@@ -496,7 +496,7 @@ def parse_opt(known=False):
     parser.add_argument('--evolve', type=int, nargs='?', const=150, help='evolve hyperparameters for x generations')
     parser.add_argument('--bucket', type=str, default='', help='gsutil bucket')
     parser.add_argument('--cache', type=str, nargs='?', const='ram', help='--cache images in "ram" (default) or "disk"')
-    parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
+    parser.add_argument('--images-weights', action='store_true', help='use weighted images selection for training')
     parser.add_argument('--device', default='0,1,2,3', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')                          # gpu
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
     parser.add_argument('--single-cls', action='store_true', help='train multi-class data as single-class')
@@ -517,7 +517,7 @@ def parse_opt(known=False):
     # Weights & Biases arguments
     parser.add_argument('--entity', default=None, help='W&B: Entity')
     parser.add_argument('--upload_dataset', nargs='?', const=True, default=False, help='W&B: Upload data, "val" option')
-    parser.add_argument('--bbox_interval', type=int, default=-1, help='W&B: Set bounding-box image logging interval')
+    parser.add_argument('--bbox_interval', type=int, default=-1, help='W&B: Set bounding-box images logging interval')
     parser.add_argument('--artifact_alias', type=str, default='latest', help='W&B: Version of dataset artifact to use')
 
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
@@ -548,14 +548,14 @@ def main(opt, callbacks=Callbacks()):
                 opt.project = str(ROOT / 'runs/evolve')
             opt.exist_ok, opt.resume = opt.resume, False  # pass resume to exist_ok and disable resume
         if opt.name == 'cfg':
-            opt.name = Path(opt.cfg).stem  # use model.yaml as name
+            opt.name = Path(opt.cfg).stem  # use models.yaml as name
         opt.save_dir = str(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))
 
     # DDP mode
     device = select_device(opt.device, batch_size=opt.batch_size)
     if LOCAL_RANK != -1:
         msg = 'is not compatible with YOLOv5 Multi-GPU DDP training'
-        assert not opt.image_weights, f'--image-weights {msg}'
+        assert not opt.image_weights, f'--images-weights {msg}'
         assert not opt.evolve, f'--evolve {msg}'
         assert opt.batch_size != -1, f'AutoBatch with --batch-size -1 {msg}, please pass a valid --batch-size'
         assert opt.batch_size % WORLD_SIZE == 0, f'--batch-size {opt.batch_size} must be multiple of WORLD_SIZE'
@@ -596,18 +596,18 @@ def main(opt, callbacks=Callbacks()):
             'anchor_t': (1, 2.0, 8.0),  # anchor-multiple threshold
             'anchors': (2, 2.0, 10.0),  # anchors per output grid (0 to ignore)
             'fl_gamma': (0, 0.0, 2.0),  # focal loss gamma (efficientDet default gamma=1.5)
-            'hsv_h': (1, 0.0, 0.1),  # image HSV-Hue augmentation (fraction)
-            'hsv_s': (1, 0.0, 0.9),  # image HSV-Saturation augmentation (fraction)
-            'hsv_v': (1, 0.0, 0.9),  # image HSV-Value augmentation (fraction)
-            'degrees': (1, 0.0, 45.0),  # image rotation (+/- deg)
-            'translate': (1, 0.0, 0.9),  # image translation (+/- fraction)
-            'scale': (1, 0.0, 0.9),  # image scale (+/- gain)
-            'shear': (1, 0.0, 10.0),  # image shear (+/- deg)
-            'perspective': (0, 0.0, 0.001),  # image perspective (+/- fraction), range 0-0.001
-            'flipud': (1, 0.0, 1.0),  # image flip up-down (probability)
-            'fliplr': (0, 0.0, 1.0),  # image flip left-right (probability)
-            'mosaic': (1, 0.0, 1.0),  # image mixup (probability)
-            'mixup': (1, 0.0, 1.0),  # image mixup (probability)
+            'hsv_h': (1, 0.0, 0.1),  # images HSV-Hue augmentation (fraction)
+            'hsv_s': (1, 0.0, 0.9),  # images HSV-Saturation augmentation (fraction)
+            'hsv_v': (1, 0.0, 0.9),  # images HSV-Value augmentation (fraction)
+            'degrees': (1, 0.0, 45.0),  # images rotation (+/- deg)
+            'translate': (1, 0.0, 0.9),  # images translation (+/- fraction)
+            'scale': (1, 0.0, 0.9),  # images scale (+/- gain)
+            'shear': (1, 0.0, 10.0),  # images shear (+/- deg)
+            'perspective': (0, 0.0, 0.001),  # images perspective (+/- fraction), range 0-0.001
+            'flipud': (1, 0.0, 1.0),  # images flip up-down (probability)
+            'fliplr': (0, 0.0, 1.0),  # images flip left-right (probability)
+            'mosaic': (1, 0.0, 1.0),  # images mixup (probability)
+            'mixup': (1, 0.0, 1.0),  # images mixup (probability)
             'copy_paste': (1, 0.0, 1.0)}  # segment copy-paste (probability)
 
         with open(opt.hyp, errors='ignore') as f:

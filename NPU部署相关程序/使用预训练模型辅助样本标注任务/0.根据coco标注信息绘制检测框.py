@@ -16,21 +16,21 @@ def xywh2xyxy(coco_info=[0.333854,0.559259,0.0114583,0.0537037],image_shape=[192
     return int(x1),int(y1),int(x2),int(y2)
 
 def drawbox_in_image(image_path,box_info_list,save_write_box_path=r'D:\迅雷下载\AI数据集汇总\Vimicro_DVR_Dataset\extract_detect_traffic_light\bdd_100k_model_draw_box_images'):
-    image = cv2.imread(image_path)
-    image_shape = image.shape
+    images = cv2.imread(image_path)
+    image_shape = images.shape
     for box_info in box_info_list:
         # 读取每个xywh标注的xyxy坐标
         x1,y1,x2,y2 = xywh2xyxy(box_info,image_shape)
 
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255))
+        cv2.rectangle(images, (x1, y1), (x2, y2), (0, 0, 255))
     # print(image_path)
     save_write_box_image_path = os.path.join(save_write_box_path,image_path.split('\\')[-1])
     print(save_write_box_image_path)
-    # print(image)
+    # print(images)
 
-    # cv2.imshow('test',image)
+    # cv2.imshow('test',images)
     # cv2.waitKey(0)  # 等待按键
-    cv2.imwrite(save_write_box_image_path,image)
+    cv2.imwrite(save_write_box_image_path,images)
 '''
 
 def xywh2xyxy(coco_info=[0.333854,0.559259,0.0114583,0.0537037],image_shape=[1920,1080]):

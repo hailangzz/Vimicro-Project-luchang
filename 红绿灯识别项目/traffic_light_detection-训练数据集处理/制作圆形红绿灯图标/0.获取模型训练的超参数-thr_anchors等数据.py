@@ -37,7 +37,7 @@ def check_anchors(dataset, model, thr=4.0, imgsz=640):
         bpr = (best > 1 / thr).float().mean()  # best possible recall
         return bpr, aat
 
-    stride = m.stride.to(m.anchors.device).view(-1, 1, 1)  # model strides
+    stride = m.stride.to(m.anchors.device).view(-1, 1, 1)  # models strides
     anchors = m.anchors.clone() * stride  # current anchors
     bpr, aat = metric(anchors.cpu().view(-1, 2))
 
@@ -72,7 +72,7 @@ def kmean_anchors(path='./data/ccpd.yaml',anchor_data_type='train', n=9, img_siz
         Arguments:
             path: path to dataset *.yaml, or a loaded dataset
             n: number of anchors
-            img_size: image size used for training
+            img_size: images size used for training
             thr: anchor-label wh ratio threshold hyperparameter hyp['anchor_t'] used for training, default=4.0
             gen: generations to evolve anchors using genetic algorithm
 
@@ -118,7 +118,7 @@ def kmean_anchors(path='./data/ccpd.yaml',anchor_data_type='train', n=9, img_siz
 
     if isinstance(path, str):  # *.yaml file
         with open(path,'rb') as f:
-            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # models dict
             print(data_dict)
         from utils.datasets import LoadImagesAndLabels
         dataset = LoadImagesAndLabels(data_dict[anchor_data_type], augment=True, rect=True)

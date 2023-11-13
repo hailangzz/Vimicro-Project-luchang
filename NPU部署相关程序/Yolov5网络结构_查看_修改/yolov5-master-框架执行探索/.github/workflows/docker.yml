@@ -10,7 +10,7 @@ on:
 jobs:
   docker:
     if: github.repository == 'ultralytics/yolov5'
-    name: Push Docker image to Docker Hub
+    name: Push Docker images to Docker Hub
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push arm64 image
+      - name: Build and push arm64 images
         uses: docker/build-push-action@v3
         continue-on-error: true
         with:
@@ -38,7 +38,7 @@ jobs:
           push: true
           tags: ultralytics/yolov5:latest-arm64
 
-      - name: Build and push CPU image
+      - name: Build and push CPU images
         uses: docker/build-push-action@v3
         continue-on-error: true
         with:
@@ -47,7 +47,7 @@ jobs:
           push: true
           tags: ultralytics/yolov5:latest-cpu
 
-      - name: Build and push GPU image
+      - name: Build and push GPU images
         uses: docker/build-push-action@v3
         continue-on-error: true
         with:

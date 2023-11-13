@@ -2,8 +2,8 @@
 
 # Parameters
 nc: 80  # number of classes
-activation: nn.LeakyReLU(0.1)  # <----- Conv() activation used throughout entire YOLOv5 model
-depth_multiple: 0.33  # model depth multiple
+activation: nn.LeakyReLU(0.1)  # <----- Conv() activation used throughout entire YOLOv5 models
+depth_multiple: 0.33  # models depth multiple
 width_multiple: 0.50  # layer channel multiple
 anchors:
   - [10,13, 16,30, 33,23]  # P3/8

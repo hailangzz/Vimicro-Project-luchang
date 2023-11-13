@@ -13,7 +13,7 @@ from PIL import Image
 app = Flask(__name__)
 models = {}
 
-DETECTION_URL = "/v1/object-detection/<model>"
+DETECTION_URL = "/v1/object-detection/<models>"
 
 
 @app.route(DETECTION_URL, methods=["POST"])
@@ -21,13 +21,13 @@ def predict(model):
     if request.method != "POST":
         return
 
-    if request.files.get("image"):
+    if request.files.get("images"):
         # Method 1
-        # with request.files["image"] as f:
+        # with request.files["images"] as f:
         #     im = Image.open(io.BytesIO(f.read()))
 
         # Method 2
-        im_file = request.files["image"]
+        im_file = request.files["images"]
         im_bytes = im_file.read()
         im = Image.open(io.BytesIO(im_bytes))
 
@@ -37,9 +37,9 @@ def predict(model):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 model")
+    parser = argparse.ArgumentParser(description="Flask API exposing YOLOv5 models")
     parser.add_argument("--port", default=5000, type=int, help="port number")
-    parser.add_argument('--model', nargs='+', default=['yolov5s'], help='model(s) to run, i.e. --model yolov5n yolov5s')
+    parser.add_argument('--models', nargs='+', default=['yolov5s'], help='models(s) to run, i.e. --models yolov5n yolov5s')
     opt = parser.parse_args()
 
     for m in opt.model:

@@ -19,9 +19,9 @@ def detect(save_img=False):
     os.makedirs(out)  # make new rec_result folder
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
-    # Load yolov5 model
-    model = attempt_load(det_weights, map_location=device)  # load FP32 model
-    print("load det pretrained model successful!")
+    # Load yolov5 models
+    model = attempt_load(det_weights, map_location=device)  # load FP32 models
+    print("load det pretrained models successful!")
     imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
     if half:
         model.half()  # to FP16
@@ -31,14 +31,14 @@ def detect(save_img=False):
         print('classify:!!!',)
         modelc = LPRNet(lpr_max_len=8, phase=False, class_num=len(CHARS), dropout_rate=0).to(device)
         modelc.load_state_dict(torch.load(rec_weights, map_location=torch.device('cpu')))
-        print("load rec pretrained model successful!")
+        print("load rec pretrained models successful!")
         modelc.to(device).eval()
 
     # Set Dataloader
     vid_path, vid_writer = None, None
     if webcam:
         view_img = True
-        cudnn.benchmark = True  # set True to speed up constant image size demo
+        cudnn.benchmark = True  # set True to speed up constant images size demo
         dataset = LoadStreams(source, img_size=imgsz)
     else:
         save_img = True
@@ -77,7 +77,7 @@ def detect(save_img=False):
         t2 = torch_utils.time_synchronized()
 
         # Process detections
-        for i, det in enumerate(pred):  # detections per image
+        for i, det in enumerate(pred):  # detections per images
             if webcam:  # batch_size >= 1
                 p, s, im0 = path[i], '%g: ' % i, im0s[i].copy()
             else:
@@ -107,7 +107,7 @@ def detect(save_img=False):
                         with open(txt_path + '.txt', 'a') as f:
                             f.write(('%g ' * 5 + '\n') % (cls, xywh))  # label format
 
-                    if save_img or view_img:  # Add bbox to image
+                    if save_img or view_img:  # Add bbox to images
                         # label = '%s %.2f' % (names[int(cls)], conf)
                         lb = ""
                         for a,i in enumerate(lic_plat):
@@ -127,7 +127,7 @@ def detect(save_img=False):
                 if cv2.waitKey(1) == ord('q'):  # q to quit
                     raise StopIteration
 
-            # Save results (image with detections)
+            # Save results (images with detections)
             if save_img:
                 if dataset.mode == 'images':
                     cv2.imwrite(save_path, im0)
@@ -156,8 +156,8 @@ def detect(save_img=False):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--classify', nargs='+', type=str, default=True, help='True rec')
-    parser.add_argument('--det-weights', nargs='+', type=str, default=r'D:\中星微人工智能工作\Total_Models\yolov5-LPRNet-车牌检测识别/my_yolov5_best.pt', help='model.pt path(s)')
-    parser.add_argument('--rec-weights', nargs='+', type=str, default=r'D:\中星微人工智能工作\Total_Models\yolov5-LPRNet-车牌检测识别/LPRNet__iteration_198500.pth', help='model.pt path(s)')
+    parser.add_argument('--det-weights', nargs='+', type=str, default=r'D:\中星微人工智能工作\Total_Models\yolov5-LPRNet-车牌检测识别/my_yolov5_best.pt', help='models.pt path(s)')
+    parser.add_argument('--rec-weights', nargs='+', type=str, default=r'D:\中星微人工智能工作\Total_Models\yolov5-LPRNet-车牌检测识别/LPRNet__iteration_198500.pth', help='models.pt path(s)')
     parser.add_argument('--source', type=str, default='./demo/rec_test/', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--output', type=str, default='demo/rec_result', help='rec_result folder')  # rec_result folder
     parser.add_argument('--img-size', type=int, default=640, help='demo size (pixels)')

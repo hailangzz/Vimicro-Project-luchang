@@ -1,6 +1,6 @@
 # YOLOv5 🚀 by Ultralytics, GPL-3.0 license
 """
-Export a YOLOv5 PyTorch model to other formats. TensorFlow exports authored by https://github.com/zldrobit
+Export a YOLOv5 PyTorch models to other formats. TensorFlow exports authored by https://github.com/zldrobit
 
 Format                      | `export.py --include`         | Model
 ---                         | ---                           | ---
@@ -67,7 +67,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 
 def export_torchscript(model, im, file, optimize, prefix=colorstr('TorchScript:')):
-    # YOLOv5 TorchScript model export
+    # YOLOv5 TorchScript models export
     try:
         LOGGER.info(f'\n{prefix} starting export with torch {torch.__version__}...')
         f = file.with_suffix('.torchscript')
@@ -104,8 +104,8 @@ def export_onnx(model, im, file, opset, train, dynamic, simplify, prefix=colorst
                                         } if dynamic else None)
 
         # Checks
-        model_onnx = onnx.load(f)  # load onnx model
-        onnx.checker.check_model(model_onnx)  # check onnx model
+        model_onnx = onnx.load(f)  # load onnx models
+        onnx.checker.check_model(model_onnx)  # check onnx models
         # LOGGER.info(onnx.helper.printable_graph(model_onnx.graph))  # print
 
         # Simplify
@@ -124,7 +124,7 @@ def export_onnx(model, im, file, opset, train, dynamic, simplify, prefix=colorst
             except Exception as e:
                 LOGGER.info(f'{prefix} simplifier failure: {e}')
         LOGGER.info(f'{prefix} export success, saved as {f} ({file_size(f):.1f} MB)')
-        LOGGER.info(f"{prefix} run --dynamic ONNX model inference with: 'python detect.py --weights {f}'")
+        LOGGER.info(f"{prefix} run --dynamic ONNX models inference with: 'python detect.py --weights {f}'")
     except Exception as e:
         LOGGER.info(f'{prefix} export failure: {e}')
 
@@ -156,9 +156,9 @@ def export_coreml(model, im, file, prefix=colorstr('CoreML:')):
         LOGGER.info(f'\n{prefix} starting export with coremltools {ct.__version__}...')
         f = file.with_suffix('.mlmodel')
 
-        model.train()  # CoreML exports should be placed in model.train() mode
-        ts = torch.jit.trace(model, im, strict=False)  # TorchScript model
-        ct_model = ct.convert(ts, inputs=[ct.ImageType('image', shape=im.shape, scale=1 / 255, bias=[0, 0, 0])])
+        model.train()  # CoreML exports should be placed in models.train() mode
+        ts = torch.jit.trace(model, im, strict=False)  # TorchScript models
+        ct_model = ct.convert(ts, inputs=[ct.ImageType('images', shape=im.shape, scale=1 / 255, bias=[0, 0, 0])])
         ct_model.save(f)
 
         LOGGER.info(f'{prefix} export success, saved as {f} ({file_size(f):.1f} MB)')
@@ -256,7 +256,7 @@ def export_pb(keras_model, im, file, prefix=colorstr('TensorFlow GraphDef:')):
         LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')
         f = file.with_suffix('.pb')
 
-        m = tf.function(lambda x: keras_model(x))  # full model
+        m = tf.function(lambda x: keras_model(x))  # full models
         m = m.get_concrete_function(tf.TensorSpec(keras_model.inputs[0].shape, keras_model.inputs[0].dtype))
         frozen_func = convert_variables_to_constants_v2(m)
         frozen_func.graph.as_graph_def()
@@ -308,7 +308,7 @@ def export_edgetpu(keras_model, im, file, prefix=colorstr('Edge TPU:')):
         ver = out.stdout.decode().split()[-1]
         LOGGER.info(f'\n{prefix} starting export with Edge TPU compiler {ver}...')
         f = str(file).replace('.pt', '-int8_edgetpu.tflite')
-        f_tfl = str(file).replace('.pt', '-int8.tflite')  # TFLite model
+        f_tfl = str(file).replace('.pt', '-int8.tflite')  # TFLite models
 
         cmd = f"edgetpu_compiler -s {f_tfl}"
         subprocess.run(cmd, shell=True, check=True)
@@ -329,7 +329,7 @@ def export_tfjs(keras_model, im, file, prefix=colorstr('TensorFlow.js:')):
         LOGGER.info(f'\n{prefix} starting export with tensorflowjs {tfjs.__version__}...')
         f = str(file).replace('.pt', '_web_model')  # js dir
         f_pb = file.with_suffix('.pb')  # *.pb path
-        f_json = f + '/model.json'  # *.json path
+        f_json = f + '/models.json'  # *.json path
 
         cmd = f"tensorflowjs_converter --input_format=tf_frozen_model " \
               f"--output_node_names='Identity,Identity_1,Identity_2,Identity_3' {f_pb} {f}"
@@ -357,22 +357,22 @@ def export_tfjs(keras_model, im, file, prefix=colorstr('TensorFlow.js:')):
 @torch.no_grad()
 def run(data=ROOT / 'data/coco128.yaml',  # 'dataset.yaml path'
         weights=ROOT / 'yolov5s.pt',  # weights path
-        imgsz=(640, 640),  # image (height, width)
+        imgsz=(640, 640),  # images (height, width)
         batch_size=1,  # batch size
         device='cpu',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
         include=('torchscript', 'onnx'),  # include formats
         half=False,  # FP16 half-precision export
         inplace=False,  # set YOLOv5 Detect() inplace=True
-        train=False,  # model.train() mode
+        train=False,  # models.train() mode
         optimize=False,  # TorchScript: optimize for mobile
         int8=False,  # CoreML/TF INT8 quantization
         dynamic=False,  # ONNX/TF: dynamic axes
-        simplify=False,  # ONNX: simplify model
+        simplify=False,  # ONNX: simplify models
         opset=12,  # ONNX: opset version
         verbose=False,  # TensorRT: verbose log
         workspace=4,  # TensorRT: workspace size (GB)
-        nms=False,  # TF: add NMS to model
-        agnostic_nms=False,  # TF: add agnostic NMS to model
+        nms=False,  # TF: add NMS to models
+        agnostic_nms=False,  # TF: add agnostic NMS to models
         topk_per_class=100,  # TF.js NMS: topk per class to keep
         topk_all=100,  # TF.js NMS: topk for all classes to keep
         iou_thres=0.45,  # TF.js NMS: IoU threshold
@@ -387,17 +387,17 @@ def run(data=ROOT / 'data/coco128.yaml',  # 'dataset.yaml path'
     imgsz *= 2 if len(imgsz) == 1 else 1  # expand
     opset = 12 if ('openvino' in include) else opset  # OpenVINO requires opset <= 12
 
-    # Load PyTorch model
+    # Load PyTorch models
     device = select_device(device)
     assert not (device.type == 'cpu' and half), '--half only compatible with GPU export, i.e. use --device 0'
-    model = attempt_load(weights, map_location=device, inplace=True, fuse=True)  # load FP32 model
+    model = attempt_load(weights, map_location=device, inplace=True, fuse=True)  # load FP32 models
 
     # Input
     gs = int(max(model.stride))  # grid size (max stride)
     imgsz = [check_img_size(x, gs) for x in imgsz]  # verify img_size are gs-multiples
-    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # image size(1,3,320,192) BCHW iDetection
+    im = torch.zeros(batch_size, 3, *imgsz).to(device)  # images size(1,3,320,192) BCHW iDetection
 
-    # Update model
+    # Update models
     if half:
         im, model = im.half(), model.half()  # to FP16
     model.train() if train else model.eval()  # training mode = no Detect() layer grid construction
@@ -433,7 +433,7 @@ def run(data=ROOT / 'data/coco128.yaml',  # 'dataset.yaml path'
         assert not (tflite and tfjs), 'TFLite and TF.js models must be exported separately, please pass only one type.'
         model = export_saved_model(model, im, file, dynamic, tf_nms=nms or agnostic_nms or tfjs,
                                    agnostic_nms=agnostic_nms or tfjs, topk_per_class=topk_per_class, topk_all=topk_all,
-                                   conf_thres=conf_thres, iou_thres=iou_thres)  # keras model
+                                   conf_thres=conf_thres, iou_thres=iou_thres)  # keras models
         if pb or tfjs:  # pb prerequisite to tfjs
             export_pb(model, im, file)
         if tflite or edgetpu:
@@ -452,22 +452,22 @@ def run(data=ROOT / 'data/coco128.yaml',  # 'dataset.yaml path'
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--data', type=str, default=ROOT / 'data/coco128.yaml', help='dataset.yaml path')
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model.pt path(s)')
-    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640, 640], help='image (h, w)')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='models.pt path(s)')
+    parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640, 640], help='images (h, w)')
     parser.add_argument('--batch-size', type=int, default=1, help='batch size')
     parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--half', action='store_true', help='FP16 half-precision export')
     parser.add_argument('--inplace', action='store_true', help='set YOLOv5 Detect() inplace=True')
-    parser.add_argument('--train', action='store_true', help='model.train() mode')
+    parser.add_argument('--train', action='store_true', help='models.train() mode')
     parser.add_argument('--optimize', action='store_true', help='TorchScript: optimize for mobile')
     parser.add_argument('--int8', action='store_true', help='CoreML/TF INT8 quantization')
     parser.add_argument('--dynamic', action='store_true', help='ONNX/TF: dynamic axes')
-    parser.add_argument('--simplify', action='store_true', help='ONNX: simplify model')
+    parser.add_argument('--simplify', action='store_true', help='ONNX: simplify models')
     parser.add_argument('--opset', type=int, default=12, help='ONNX: opset version')
     parser.add_argument('--verbose', action='store_true', help='TensorRT: verbose log')
     parser.add_argument('--workspace', type=int, default=4, help='TensorRT: workspace size (GB)')
-    parser.add_argument('--nms', action='store_true', help='TF: add NMS to model')
-    parser.add_argument('--agnostic-nms', action='store_true', help='TF: add agnostic NMS to model')
+    parser.add_argument('--nms', action='store_true', help='TF: add NMS to models')
+    parser.add_argument('--agnostic-nms', action='store_true', help='TF: add agnostic NMS to models')
     parser.add_argument('--topk-per-class', type=int, default=100, help='TF.js NMS: topk per class to keep')
     parser.add_argument('--topk-all', type=int, default=100, help='TF.js NMS: topk for all classes to keep')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='TF.js NMS: IoU threshold')
