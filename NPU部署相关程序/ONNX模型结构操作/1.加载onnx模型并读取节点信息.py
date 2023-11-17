@@ -1,6 +1,6 @@
 import onnx
 
-model_in_file = 'D:\中星微人工智能工作\人车非项目\PytorchOCR_copy\model_weight\\best_rec_pco_model.onnx'
+model_in_file = r"C:\Users\zhangzuo\Downloads\facemesh_face_landmark.onnx"
 
 if __name__ == "__main__":
     model = onnx.load(model_in_file)

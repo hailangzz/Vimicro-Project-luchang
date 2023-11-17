@@ -1,8 +1,9 @@
 import onnx
 from onnx import helper
+import onnxsim
 
 # 加载ONNX模型
-model_path = r"C:\Users\zhangzuo\Desktop/face_landmark1.onnx"
+model_path = r"C:\Users\zhangzuo\Downloads\facemesh_face_landmark_simple.onnx"
 onnx_model = onnx.load(model_path)
 
 # 查找节点类型
@@ -11,105 +12,123 @@ graph = onnx_model.graph
 node = graph.node
 for i in range(len(node)):
     if node[i].op_type == 'Pad':
-        print(node[i],i)
+        print(i,node[i])
         delect_node_name_dict[i] = node[i]
 
 
 for node_inde,node in delect_node_name_dict.items():
-    onnx_model.graph.node.remove(node)
+
     if node_inde==13:
-        node1 = onnx.helper.make_node(
-            op_type='Transpose',
-            name='to_Transpose1',
-            inputs=['max_pooling2d_1'],
-            outputs=['to_Transpose1'],
-            perm=[0,2,3,1],
-        )
-        onnx_model.graph.node.insert(11, node1)
+        onnx_model.graph.node.remove(node)
+        # node1 = onnx.helper.make_node(
+        #     'Transpose',
+        #     name='Transpose1',
+        #     inputs=['max_pooling2d_1'],
+        #     outputs=['Transpose1'],
+        #     perm=[0,2,3,1],
+        # )
+        # onnx_model.graph.node.insert(12, node1)
+
+        pad_value = 0  # 可以根据需要更改填充值
+        pads = [0, 0, 8, 8, 0, 0, 0, 0]  # 根据输入输出尺寸的差异计算填充值
 
         node2 = onnx.helper.make_node(
             op_type='Pad',
-            inputs=['to_Transpose1'],
-            outputs=['to_Pad1'],
+            inputs=['max_pooling2d'],
+            outputs=['channel_padding'],
             mode='constant',
-            pads=[0, 0, 0, 0, 0, 0, 0, 16],
-            name='to_Pad1',
+            pads=pads,
+            value=pad_value,
         )
-        onnx_model.graph.node.insert(12, node2)
-
-        node3 = onnx.helper.make_node(
-            op_type='Transpose',
-            name='channel_padding_1',
-            inputs=['to_Pad1'],
-            outputs=['channel_padding_1'],
-            perm=[0, 3, 1, 2],
-        )
-        onnx_model.graph.node.insert(13, node3)
-
-    if node_inde==27:
-        node1 = onnx.helper.make_node(
-            op_type='Transpose',
-            name='to_pad2',
-            inputs=['max_pooling2d_2'],
-            outputs=['to_pad2'],
-            perm=[0,2,3,1],
-        )
-        onnx_model.graph.node.insert(25, node1)
-
-        node2 = onnx.helper.make_node(
-            op_type='Pad',
-            inputs=['to_pad2'],
-            outputs=['to_tran2'],
-            mode='constant',
-            pads=[0, 0, 0, 0, 0, 0, 0, 32],
-            name='to_tran2',
-
-        )
-        onnx_model.graph.node.insert(26, node2)
-
-        node3 = onnx.helper.make_node(
-            op_type='Transpose',
-            name='channel_padding_2',
-            inputs=['to_tran2'],
-            outputs=['channel_padding_2'],
-            perm=[0, 3, 1, 2],
-        )
-        onnx_model.graph.node.insert(27, node3)
-
-    if node_inde==41:
-        node1 = onnx.helper.make_node(
-            op_type='Transpose',
-            name='to_pad3',
-            inputs=['max_pooling2d_3'],
-            outputs=['to_pad3'],
-            perm=[0,2,3,1],
-        )
-        onnx_model.graph.node.insert(39, node1)
-
-        node2 = onnx.helper.make_node(
-            op_type='Pad',
-            inputs=['to_pad3'],
-            outputs=['to_tran3'],
-            mode='constant',
-            pads=[0, 0, 0, 0, 0, 0, 0, 64],
-            name='to_tran3',
-        )
-        onnx_model.graph.node.insert(40, node2)
-
-        node3 = onnx.helper.make_node(
-            op_type='Transpose',
-            name='channel_padding_3',
-            inputs=['to_tran3'],
-            outputs=['channel_padding_3'],
-            perm=[0, 3, 1, 2],
-        )
-        onnx_model.graph.node.insert(41, node3)
-
-#      onnx_model.graph.node.remove(node)
+        onnx_model.graph.node.insert(13, node2)
+# # #
+#         node3 = onnx.helper.make_node(
+#             op_type='Transpose',
+#             name='channel_padding_1',
+#             inputs=['Pad_1'],
+#             outputs=['channel_padding_1'],
+#             perm=[0, 3, 1, 2],
+#         )
+#         onnx_model.graph.node.insert(12, node3)
 #
-# # 如果需要，更新输入和输出
-# # ...
-# # 保存修改后的模型
+    if node_inde==27:
+        onnx_model.graph.node.remove(node)
+    #     node1 = onnx.helper.make_node(
+    #         op_type='Transpose',
+    #         name='channel_padding_2',
+    #         inputs=['max_pooling2d_2'],
+    #         outputs=['channel_padding_2'],
+    #         perm=[0,2,3,1],
+    #     )
+    #     onnx_model.graph.node.insert(26, node1)
+
+        pad_value = 0  # 可以根据需要更改填充值
+        pads = [0, 0, 16, 16, 0, 0, 0, 0]  # 根据输入输出尺寸的差异计算填充值
+
+        node2 = onnx.helper.make_node(
+            op_type='Pad',
+            inputs=['max_pooling2d_1'],
+            outputs=['channel_padding_1'],
+            mode='constant',
+            pads=pads,
+            name='channel_padding_1',
+            value=pad_value
+
+        )
+        onnx_model.graph.node.insert(27, node2)
+#
+#         node3 = onnx.helper.make_node(
+#             op_type='Transpose',
+#             name='channel_padding_2',
+#             inputs=['to_tran2'],
+#             outputs=['channel_padding_2'],
+#             perm=[0, 3, 1, 2],
+#         )
+#         onnx_model.graph.node.insert(27, node3)
+#
+    if node_inde==41:
+        onnx_model.graph.node.remove(node)
+    #     node1 = onnx.helper.make_node(
+    #         op_type='Transpose',
+    #         name='channel_padding_3',
+    #         inputs=['max_pooling2d_3'],
+    #         outputs=['channel_padding_3'],
+    #         perm=[0,2,3,1],
+    #     )
+    #     onnx_model.graph.node.insert(40, node1)
+
+        pad_value = 0  # 可以根据需要更改填充值
+        pads = [0, 0, 32, 32, 0, 0, 0, 0]  # 根据输入输出尺寸的差异计算填充值
+        node2 = onnx.helper.make_node(
+            op_type='Pad',
+            inputs=['max_pooling2d_2'],
+            outputs=['channel_padding_2'],
+            mode='constant',
+            pads=pads,
+            name='channel_padding_2',
+            value=pad_value
+        )
+        onnx_model.graph.node.insert(41, node2)
+#
+#         node3 = onnx.helper.make_node(
+#             op_type='Transpose',
+#             name='channel_padding_3',
+#             inputs=['to_tran3'],
+#             outputs=['channel_padding_3'],
+#             perm=[0, 3, 1, 2],
+#         )
+#         onnx_model.graph.node.insert(41, node3)
+#
+# #      onnx_model.graph.node.remove(node)
+# #
+# # # 如果需要，更新输入和输出
+# # # ...
+# # # 保存修改后的模型
 output_model_path = r"C:\Users\zhangzuo\Desktop/modified_model.onnx"
+
+# simplified_model, check = onnxsim.simplify(onnx_model)
+# print("onnx model simplify Ok!")
+# onnx.save(simplified_model, output_model_path)
+
 onnx.save(onnx_model, output_model_path)
 onnx.checker.check_model(onnx_model)
